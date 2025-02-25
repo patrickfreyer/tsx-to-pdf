@@ -45,6 +45,12 @@ chalk.blue.bold = (text) => colors.blue(colors.bold(text));
 async function run() {
   console.log(chalk.blue.bold('\n=== TSX to PDF Converter ===\n'));
   
+  // Check if running in Replit
+  const isReplit = process.env.REPL_SLUG && process.env.REPL_OWNER;
+  if (isReplit) {
+    console.log(chalk.green(`Running in Replit environment: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`));
+  }
+  
   // Step 1: Ensure input directory exists
   const inputDir = path.join(__dirname, 'input');
   try {
