@@ -108,6 +108,12 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
   // Ensure tsxPaths is an array
   const tsxPathsArray = Array.isArray(tsxPaths) ? tsxPaths : [tsxPaths];
   
+  // Ensure output path is in the output directory
+  let finalOutputPath = outputPath;
+  if (!finalOutputPath.startsWith('output/') && !path.isAbsolute(finalOutputPath)) {
+    finalOutputPath = path.join('output', finalOutputPath);
+  }
+  
   const {
     aspectRatio = '16:9',
     paperSize = 'A4',
@@ -118,7 +124,7 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
 
   console.log(`Starting conversion of ${tsxPathsArray.length} TSX files to PDF...`);
   console.log(`TSX files: ${tsxPathsArray.join(', ')}`);
-  console.log(`Output path: ${outputPath}`);
+  console.log(`Output path: ${finalOutputPath}`);
   console.log(`Options: ${JSON.stringify(options, null, 2)}`);
   
   // Set debug mode environment variable
@@ -127,8 +133,9 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
   }
   
   // Create output directory if it doesn't exist
-  const outputDir = path.dirname(outputPath);
+  const outputDir = path.dirname(finalOutputPath);
   await fs.mkdir(outputDir, { recursive: true });
+  console.log(`Ensuring output directory exists: ${outputDir}`);
   
   // Create temp directory if it doesn't exist
   const tempDir = path.join(process.cwd(), 'temp');
@@ -259,8 +266,8 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
       console.log(`Generated ${tempPdfPaths.length} PDF files`);
       if (tempPdfPaths.length === 1) {
         // Just copy the single PDF
-        console.log(`Copying single PDF to output: ${outputPath}`);
-        await fs.copyFile(tempPdfPaths[0], outputPath);
+        console.log(`Copying single PDF to output: ${finalOutputPath}`);
+        await fs.copyFile(tempPdfPaths[0], finalOutputPath);
       } else {
         // Merge multiple PDFs using pdf-lib
         console.log('Merging multiple PDFs');
@@ -276,9 +283,9 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
         
         console.log('Saving merged PDF');
         const mergedPdfBytes = await mergedPdf.save();
-        await fs.writeFile(outputPath, mergedPdfBytes);
+        await fs.writeFile(finalOutputPath, mergedPdfBytes);
       }
-      console.log(`PDF successfully created at: ${outputPath}`);
+      console.log(`PDF successfully created at: ${finalOutputPath}`);
     } else {
       console.error('No PDFs were generated.');
     }
