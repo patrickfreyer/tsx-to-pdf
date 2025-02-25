@@ -38,8 +38,25 @@ The tool now includes a web-based user interface for easier use:
    - Select a component to export
    - Configure export options (aspect ratio, paper size, orientation, etc.)
    - Export the component to PDF
+   - View and download previously exported PDF files
 
 The UI provides a simple and intuitive way to export your TSX components without having to use the command line.
+
+### Export Tab
+
+The Export tab allows you to:
+- Select a component from the input directory
+- Set the output file name
+- Configure export options
+- Export the component to PDF
+
+### Output Files Tab
+
+The Output Files tab allows you to:
+- View a list of all exported PDF files
+- See file details (size, creation date)
+- View PDFs directly in the browser
+- Download PDFs to your computer
 
 ## Manual Usage
 
