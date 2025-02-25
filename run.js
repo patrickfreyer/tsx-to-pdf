@@ -4,20 +4,39 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawn, execSync } from 'child_process';
-// Import chalk using dynamic import for compatibility with chalk v4 in ESM
-import chalk from 'chalk';
+// Remove the direct chalk import and use a simple color function instead
+// import chalk from 'chalk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Check if chalk is installed, if not install it
-try {
-  require.resolve('chalk');
-} catch (e) {
-  console.log('Installing required dependencies...');
-  execSync('npm install chalk@4.1.2', { stdio: 'inherit' });
-  console.log('Dependencies installed successfully.');
-}
+// Simple color functions to replace chalk
+const colors = {
+  blue: (text) => `\x1b[34m${text}\x1b[0m`,
+  green: (text) => `\x1b[32m${text}\x1b[0m`,
+  red: (text) => `\x1b[31m${text}\x1b[0m`,
+  yellow: (text) => `\x1b[33m${text}\x1b[0m`,
+  bold: (text) => `\x1b[1m${text}\x1b[0m`
+};
+
+// Create a simple chalk-like API
+const chalk = {
+  blue: {
+    bold: (text) => colors.blue(colors.bold(text))
+  },
+  green: (text) => colors.green(text),
+  red: (text) => colors.red(text),
+  yellow: (text) => colors.yellow(text)
+};
+
+// Remove the chalk installation check since we're not using it anymore
+// try {
+//   require.resolve('chalk');
+// } catch (e) {
+//   console.log('Installing required dependencies...');
+//   execSync('npm install chalk@4.1.2', { stdio: 'inherit' });
+//   console.log('Dependencies installed successfully.');
+// }
 
 async function run() {
   console.log(chalk.blue.bold('\n=== TSX to PDF Converter ===\n'));
@@ -53,7 +72,7 @@ async function run() {
   // Step 3: Run the setup script
   console.log(chalk.blue('\nSetting up development server...'));
   try {
-    execSync('./setup-dev-server.js', { stdio: 'inherit' });
+    execSync('node setup-dev-server.js', { stdio: 'inherit' });
     console.log(chalk.green('✓ Development server setup complete'));
   } catch (err) {
     console.error(chalk.red('Error setting up development server:'), err);
