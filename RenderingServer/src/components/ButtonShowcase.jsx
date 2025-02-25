@@ -1,7 +1,7 @@
 
 import React from 'react';
-import ReactDOM from 'react-dom/client.js';
-import Component from '../../../input/button-showcase.js';
+import ReactDOM from 'react-dom/client';
+import Component from '../../../input/button-showcase.tsx';
 
 // Add global styles if needed
 import '../index.css';

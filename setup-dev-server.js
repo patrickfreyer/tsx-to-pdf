@@ -12,12 +12,12 @@ async function setupDevServer() {
   console.log('Setting up development server for TSX components...');
   
   // Create a dev-server directory if it doesn't exist
-  const devServerDir = path.join(__dirname, 'dev-server');
+  const devServerDir = path.join(__dirname, 'RenderingServer');
   try {
     await fs.mkdir(devServerDir, { recursive: true });
-    console.log(`Created dev-server directory at: ${devServerDir}`);
+    console.log(`Created RenderingServer directory at: ${devServerDir}`);
   } catch (err) {
-    console.log('Dev-server directory already exists');
+    console.log('RenderingServer directory already exists');
   }
   
   // Create package.json for the dev server
@@ -278,7 +278,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   
   console.log('Development server setup complete!');
   console.log('To start the server:');
-  console.log('1. cd dev-server');
+  console.log('1. cd RenderingServer');
   console.log('2. npm install');
   console.log('3. npm run dev');
   console.log('\nAvailable components:');

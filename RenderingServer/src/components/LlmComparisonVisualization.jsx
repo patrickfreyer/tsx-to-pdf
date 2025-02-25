@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Component from '../../../input/button-showcase.tsx';
+import Component from '../../../input/llm-comparison-visualization.tsx';
 
 // Add global styles if needed
 import '../index.css';

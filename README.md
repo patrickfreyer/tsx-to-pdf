@@ -98,7 +98,7 @@ Run the setup script to create a development server that will serve your TSX com
 Then start the server:
 
 ```bash
-cd dev-server
+cd RenderingServer
 npm install
 npm run dev
 ```
@@ -141,7 +141,7 @@ npm run convert input/complex-flowchart.tsx --paper-size=Letter --margin=20
 - `output/` - Exported PDFs are saved here
 - `ConverterFrontend/` - Frontend UI source code
 - `ConverterService/` - Backend source code
-- `dev-server/` - Development server for rendering TSX components
+- `RenderingServer/` - Development server for rendering TSX components
 
 ## Examples
 

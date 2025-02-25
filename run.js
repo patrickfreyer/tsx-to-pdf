@@ -64,7 +64,7 @@ async function run() {
   console.log(chalk.yellow('The server will run in the background. Press Ctrl+C to stop everything when done.'));
   
   const serverProcess = spawn('npm', ['run', 'dev'], { 
-    cwd: path.join(__dirname, 'dev-server'),
+    cwd: path.join(__dirname, 'RenderingServer'),
     shell: true,
     detached: false
   });

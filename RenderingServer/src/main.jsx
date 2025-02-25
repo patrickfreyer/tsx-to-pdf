@@ -13,6 +13,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <li><a href="/ComplexFlowchart" className="text-blue-600 hover:underline">ComplexFlowchart</a></li>
         <li><a href="/ExampleSlide" className="text-blue-600 hover:underline">ExampleSlide</a></li>
         <li><a href="/ButtonShowcase" className="text-blue-600 hover:underline">button-showcase</a></li>
+        <li><a href="/LlmComparisonVisualization" className="text-blue-600 hover:underline">llm-comparison-visualization</a></li>
         <li><a href="/ThinkingLlmVisualization" className="text-blue-600 hover:underline">thinking-llm-visualization</a></li>
       </ul>
     </div>
