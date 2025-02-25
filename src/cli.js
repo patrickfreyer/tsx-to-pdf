@@ -49,10 +49,14 @@ yargs(hideBin(process.argv))
           type: 'boolean',
           default: false,
         })
-        .epilogue('All PDFs will be saved to the output/ directory by default unless an absolute path is provided.');
+        .epilogue('All PDFs will be saved to the output/ directory by default unless an absolute path is provided.\nNOTE: This tool assumes you have a development server running at http://localhost:5174 that can serve your TSX components.');
     },
     async (argv) => {
       try {
+        // Check if localhost:5174 is accessible
+        console.log('NOTE: This tool requires a development server running at http://localhost:5174');
+        console.log('Make sure your server is running before continuing.');
+        
         // Ensure output path is properly formatted
         let outputPath = argv.output;
         if (!path.isAbsolute(outputPath) && !outputPath.startsWith('output/')) {

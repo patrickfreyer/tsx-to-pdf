@@ -69,32 +69,20 @@ function extractStylesFromTsx(tsxContent) {
  * 
  * @param {string} tsxPath - Path to the TSX file
  * @param {string} outputDir - Directory to output the bundle
- * @returns {Promise<{htmlPath: string, styles: Object}>} - Path to the built HTML file and extracted styles
+ * @returns {Promise<{componentName: string, componentUrl: string}>} - Component name and URL
  */
 async function buildTsxFile(tsxPath, outputDir) {
-  console.log(`Building TSX file: ${tsxPath}`);
+  console.log(`Processing TSX file: ${tsxPath}`);
   
-  // Create a temporary directory for the build
-  const tempDir = path.join(process.cwd(), 'temp');
-  await fs.mkdir(tempDir, { recursive: true });
-  
-  // Create a simple HTML file that will load the TSX component
+  // Get the component name from the file name
   const componentName = path.basename(tsxPath, path.extname(tsxPath));
-  const htmlPath = path.join(tempDir, `${componentName}.html`);
   
-  // Copy the template HTML file to the temp directory
-  const templatePath = path.join(process.cwd(), 'src/template.html');
-  await fs.copyFile(templatePath, htmlPath);
+  // Assuming the component is available at localhost:5174/ComponentName
+  // This assumes your development server is running and serving the components
+  const componentUrl = `http://localhost:5174/${componentName}`;
+  console.log(`Component URL: ${componentUrl}`);
   
-  // Read the TSX file content
-  const tsxContent = await fs.readFile(tsxPath, 'utf-8');
-  console.log(`Read TSX file: ${tsxPath}`);
-  
-  // Extract styles from the TSX content
-  const styles = extractStylesFromTsx(tsxContent);
-  
-  console.log(`Created HTML file at: ${htmlPath}`);
-  return { htmlPath, styles };
+  return { componentName, componentUrl };
 }
 
 /**
@@ -184,59 +172,25 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
       console.log(`Processing file ${i+1}/${tsxPathsArray.length}: ${tsxPath}`);
       
       try {
-        // Build the TSX file into a bundle
-        const { htmlPath, styles } = await buildTsxFile(tsxPath, distDir);
-        console.log(`HTML template created at: ${htmlPath}`);
+        // Get the component URL
+        const { componentName, componentUrl } = await buildTsxFile(tsxPath);
         
-        // Create PDF from HTML
+        // Create PDF from the component URL
         const tempPdfPath = path.join(tempDir, `slide_${i}.pdf`);
-        console.log(`Loading HTML in browser: file://${path.resolve(htmlPath)}`);
-        await page.goto(`file://${path.resolve(htmlPath)}`, { 
-          waitUntil: 'networkidle0' 
+        console.log(`Loading component in browser: ${componentUrl}`);
+        
+        // Navigate to the component URL
+        await page.goto(componentUrl, { 
+          waitUntil: 'networkidle0',
+          timeout: 60000 // Increase timeout to 60 seconds
         });
         
-        // Inject the TSX component directly with extracted styles
-        await page.evaluate(({ styles, filename }) => {
-          // Create a styled representation of the component
-          const root = document.getElementById('root');
-          
-          // Apply styles from the TSX file
-          root.innerHTML = `
-            <div style="
-              width: 100%;
-              height: 100%;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              background: ${styles.background};
-              color: ${styles.color};
-              font-family: Arial, sans-serif;
-              padding: 2em;
-            ">
-              <h1 style="
-                font-size: 3em;
-                margin-bottom: 0.5em;
-                text-align: center;
-              ">
-                ${styles.title || filename}
-              </h1>
-              ${styles.paragraph ? `
-                <p style="
-                  font-size: 1.5em;
-                  max-width: 80%;
-                  text-align: center;
-                  line-height: 1.4;
-                ">
-                  ${styles.paragraph}
-                </p>
-              ` : ''}
-            </div>
-          `;
-        }, { 
-          styles, 
-          filename: path.basename(tsxPath, path.extname(tsxPath)) 
-        });
+        // Wait for the component to be fully rendered
+        await page.waitForSelector('#root > *', { timeout: 10000 });
+        
+        // Optional: Wait a bit more to ensure all animations and resources are loaded
+        // Use setTimeout instead of waitForTimeout
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         console.log(`Generating PDF: ${tempPdfPath}`);
         await page.pdf({

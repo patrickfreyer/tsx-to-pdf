@@ -7,9 +7,11 @@
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "start": "node src/index.js",
-    "convert": "node src/cli.js"
+    "convert": "node src/cli.js",
+    "setup-dev-server": "node setup-dev-server.js"
   },
   "dependencies": {
+    "lucide-react": "^0.476.0",
     "pdf-lib": "^1.17.1",
     "puppeteer": "^24.3.0",
     "react": "^18.2.0",
@@ -21,6 +23,7 @@
     "@babel/preset-env": "^7.23.9",
     "@babel/preset-react": "^7.23.3",
     "@babel/preset-typescript": "^7.23.3",
+    "@svgr/webpack": "^8.1.0",
     "@types/react": "^18.2.67",
     "@types/react-dom": "^18.2.22",
     "babel-loader": "^9.1.3",

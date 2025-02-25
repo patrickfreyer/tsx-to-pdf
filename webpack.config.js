@@ -40,18 +40,21 @@ export default {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.svg$/,
+        use: ['@svgr/webpack']
       }
     ]
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
     alias: {
-      // Add aliases for common libraries if needed
       'react': path.resolve(__dirname, 'node_modules/react'),
-      'react-dom': path.resolve(__dirname, 'node_modules/react-dom')
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+      'lucide-react': path.resolve(__dirname, 'node_modules/lucide-react')
     },
     fallback: {
-      // Add polyfills for Node.js modules if needed
       "path": false,
       "fs": false
     }
