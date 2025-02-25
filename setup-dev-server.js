@@ -59,19 +59,29 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'fs';
 
-// Get all TSX files from the examples directory
-const examplesDir = path.resolve(__dirname, '../examples');
-const tsxFiles = fs.readdirSync(examplesDir)
+// Get all TSX files from the input directory
+const inputDir = path.resolve(__dirname, '../input');
+const tsxFiles = fs.readdirSync(inputDir)
   .filter(file => file.endsWith('.tsx'))
-  .map(file => file.replace('.tsx', ''));
+  .map(file => {
+    // Extract component name without extension
+    const componentName = file.replace('.tsx', '');
+    // Convert kebab-case to PascalCase for the route
+    const routeName = componentName
+      .split('-')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('');
+    
+    return { file, componentName, routeName };
+  });
 
 // Create input entries for each TSX file
 const input = {
   main: 'index.html',
 };
 
-tsxFiles.forEach(component => {
-  input[component] = \`\${component}.html\`;
+tsxFiles.forEach(({ routeName }) => {
+  input[routeName] = \`\${routeName}.html\`;
 });
 
 export default defineConfig({
@@ -169,15 +179,35 @@ code {
   
   await fs.writeFile(path.join(srcDir, 'index.css'), indexCss);
   
-  // Get all TSX files from the examples directory
-  const examplesDir = path.join(__dirname, 'examples');
-  const tsxFiles = await fs.readdir(examplesDir);
+  // Get all TSX files from the input directory
+  const inputDir = path.join(__dirname, 'input');
+  
+  // Create input directory if it doesn't exist
+  try {
+    await fs.mkdir(inputDir, { recursive: true });
+    console.log(`Ensured input directory exists at: ${inputDir}`);
+  } catch (err) {
+    console.log('Input directory already exists');
+  }
+  
+  const tsxFiles = await fs.readdir(inputDir);
   const componentFiles = tsxFiles.filter(file => file.endsWith('.tsx'));
   
-  // Create component list for main.jsx
-  const componentListItems = componentFiles.map(file => {
+  // Process component files
+  const components = componentFiles.map(file => {
     const componentName = file.replace('.tsx', '');
-    return `<li><a href="/${componentName}" className="text-blue-600 hover:underline">${componentName}</a></li>`;
+    // Convert kebab-case to PascalCase for the route
+    const routeName = componentName
+      .split('-')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('');
+    
+    return { file, componentName, routeName };
+  });
+  
+  // Create component list for main.jsx
+  const componentListItems = components.map(({ componentName, routeName }) => {
+    return `<li><a href="/${routeName}" className="text-blue-600 hover:underline">${componentName}</a></li>`;
   }).join('\n        ');
   
   // Write main.jsx with component list
@@ -187,20 +217,18 @@ code {
   );
   
   // Create component HTML files and JSX wrappers
-  for (const file of componentFiles) {
-    const componentName = file.replace('.tsx', '');
-    
+  for (const { file, componentName, routeName } of components) {
     // Create HTML file for the component
     await fs.writeFile(
-      path.join(devServerDir, `${componentName}.html`),
-      componentTemplate.replace(/COMPONENT_NAME/g, componentName)
+      path.join(devServerDir, `${routeName}.html`),
+      componentTemplate.replace(/COMPONENT_NAME/g, routeName)
     );
     
     // Create JSX wrapper for the component
     const componentJsx = `
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Component from '../../../examples/${file}';
+import Component from '../../../input/${file}';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -209,7 +237,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 );
     `;
     
-    await fs.writeFile(path.join(componentsDir, `${componentName}.jsx`), componentJsx);
+    await fs.writeFile(path.join(componentsDir, `${routeName}.jsx`), componentJsx);
   }
   
   console.log('Development server setup complete!');
@@ -217,7 +245,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   console.log('1. cd dev-server');
   console.log('2. npm install');
   console.log('3. npm run dev');
-  console.log('The server will be available at http://localhost:5174');
+  console.log('\nAvailable components:');
+  components.forEach(({ componentName, routeName }) => {
+    console.log(`- ${componentName} (accessible at: http://localhost:5174/${routeName})`);
+  });
 }
 
 setupDevServer().catch(err => {

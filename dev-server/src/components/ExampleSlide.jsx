@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Component from '../../../examples/ExampleSlide.tsx';
+import Component from '../../../input/ExampleSlide.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

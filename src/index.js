@@ -76,11 +76,18 @@ async function buildTsxFile(tsxPath, outputDir) {
   console.log(`Processing TSX file: ${tsxPath}`);
   
   // Get the component name from the file name
-  const componentName = path.basename(tsxPath, path.extname(tsxPath));
+  const fileName = path.basename(tsxPath, path.extname(tsxPath));
+  
+  // Convert kebab-case to PascalCase for the route
+  const componentName = fileName
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
   
   // Assuming the component is available at localhost:5174/ComponentName
   // This assumes your development server is running and serving the components
   const componentUrl = `http://localhost:5174/${componentName}`;
+  
   console.log(`Component URL: ${componentUrl}`);
   
   return { componentName, componentUrl };

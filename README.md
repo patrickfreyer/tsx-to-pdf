@@ -16,27 +16,36 @@ npm install
 
 ## Usage
 
-### Step 1: Start your development server
+### Step 1: Add your TSX components
 
-Before using this tool, you need to have a development server running at http://localhost:5174 that can serve your TSX components.
+Place your TSX component files in the `input` directory. The tool supports both PascalCase and kebab-case file naming:
+- `MyComponent.tsx` (PascalCase)
+- `my-component.tsx` (kebab-case)
 
-For example, if you're using Vite, you can start the server with:
+### Step 2: Set up and start the development server
+
+Run the setup script to create a development server that will serve your TSX components:
 
 ```bash
+./setup-dev-server.js
+```
+
+Then start the server:
+
+```bash
+cd dev-server
+npm install
 npm run dev
 ```
 
-Make sure your server is configured to serve each component at a URL like:
-`http://localhost:5174/ComponentName`
+The server will be available at http://localhost:5174 and will automatically serve all components in the `input` directory.
 
-Where `ComponentName` is the name of your TSX file without the extension.
-
-### Step 2: Convert TSX files to PDF
+### Step 3: Convert TSX files to PDF
 
 Once your server is running, you can use this tool to convert TSX files to PDF:
 
 ```bash
-npm run convert path/to/your/Component.tsx [output.pdf]
+npm run convert input/your-component.tsx [output.pdf]
 ```
 
 Options:
@@ -50,23 +59,24 @@ Options:
 
 Example:
 ```bash
-npm run convert examples/ComplexFlowchart.tsx --paper-size=Letter --margin=20
+npm run convert input/complex-flowchart.tsx --paper-size=Letter --margin=20
 ```
 
 ## How It Works
 
 1. The tool takes a TSX file as input
-2. It extracts the component name from the file name
+2. It extracts the component name from the file name (converting kebab-case to PascalCase if needed)
 3. It navigates to `http://localhost:5174/ComponentName` using Puppeteer
 4. It captures the rendered component as a PDF, automatically sizing the PDF to fit the content
 5. If multiple TSX files are provided, it merges them into a single PDF
 
 ## Examples
 
-The `examples` directory contains sample TSX files that you can use to test the tool:
+The `input` directory contains sample TSX files that you can use to test the tool:
 
-- `ExampleSlide.tsx`: A simple slide with a title and text
-- `ComplexFlowchart.tsx`: A more complex component with a flowchart
+- `example-slide.tsx`: A simple slide with a title and text
+- `complex-flowchart.tsx`: A more complex component with a flowchart
+- `thinking-llm-visualization.tsx`: A visualization of how thinking LLMs work
 
 ## License
 
