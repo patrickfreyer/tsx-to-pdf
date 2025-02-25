@@ -52,7 +52,7 @@ async function setupDevServer() {
     JSON.stringify(packageJson, null, 2)
   );
   
-  // Create vite.config.js
+  // Create vite.config.js with support for component dependencies
   const viteConfig = `
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -91,6 +91,14 @@ export default defineConfig({
       input,
     },
   },
+  resolve: {
+    alias: {
+      // Allow components to import from the input directory
+      '@input': path.resolve(__dirname, '../input'),
+      // Allow components to import from the components directory
+      '@components': path.resolve(__dirname, '../input/components')
+    }
+  }
 });
   `;
   
@@ -190,6 +198,15 @@ code {
     console.log('Input directory already exists');
   }
   
+  // Create components directory in input if it doesn't exist
+  const inputComponentsDir = path.join(inputDir, 'components');
+  try {
+    await fs.mkdir(inputComponentsDir, { recursive: true });
+    console.log(`Ensured components directory exists at: ${inputComponentsDir}`);
+  } catch (err) {
+    console.log('Components directory already exists');
+  }
+  
   const tsxFiles = await fs.readdir(inputDir);
   const componentFiles = tsxFiles.filter(file => file.endsWith('.tsx'));
   
@@ -224,11 +241,14 @@ code {
       componentTemplate.replace(/COMPONENT_NAME/g, routeName)
     );
     
-    // Create JSX wrapper for the component
+    // Create JSX wrapper for the component with support for dependencies
     const componentJsx = `
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Component from '../../../input/${file}';
+
+// Add global styles if needed
+import '../index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -239,6 +259,22 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     
     await fs.writeFile(path.join(componentsDir, `${routeName}.jsx`), componentJsx);
   }
+  
+  // Create a jsconfig.json file to help with imports
+  const jsConfig = {
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "@input/*": ["../input/*"],
+        "@components/*": ["../input/components/*"]
+      }
+    }
+  };
+  
+  await fs.writeFile(
+    path.join(devServerDir, 'jsconfig.json'),
+    JSON.stringify(jsConfig, null, 2)
+  );
   
   console.log('Development server setup complete!');
   console.log('To start the server:');

@@ -6,7 +6,6 @@ A tool to convert React TSX components to PDF files with proper formatting.
 
 - Node.js (v14 or higher)
 - npm or yarn
-- A development server running at http://localhost:5174 that can serve your TSX components
 
 ## Installation
 
@@ -14,13 +13,61 @@ A tool to convert React TSX components to PDF files with proper formatting.
 npm install
 ```
 
-## Usage
+## Quick Start
+
+The easiest way to use this tool is with the all-in-one command:
+
+```bash
+npm start
+```
+
+This command will:
+1. Set up the input directory
+2. Set up and start the development server
+3. Build and start the UI server
+4. Display a list of available components
+5. Keep the servers running until you press Ctrl+C
+
+## Using the Web UI
+
+The tool now includes a web-based user interface for easier use:
+
+1. Start the tool with `npm start`
+2. Open your browser and navigate to http://localhost:3000
+3. Use the UI to:
+   - Select a component to export
+   - Configure export options (aspect ratio, paper size, orientation, etc.)
+   - Export the component to PDF
+
+The UI provides a simple and intuitive way to export your TSX components without having to use the command line.
+
+## Manual Usage
+
+If you prefer to run each step manually, follow these instructions:
 
 ### Step 1: Add your TSX components
 
 Place your TSX component files in the `input` directory. The tool supports both PascalCase and kebab-case file naming:
 - `MyComponent.tsx` (PascalCase)
 - `my-component.tsx` (kebab-case)
+
+#### Working with Component Dependencies
+
+If your components import other components or have dependencies:
+
+1. **For shared components**: Place them in the `input/components` directory
+   ```jsx
+   // Example: input/MyComponent.tsx can import from input/components
+   import SharedButton from './components/SharedButton';
+   ```
+
+2. **For direct imports**: You can import components directly from the input directory
+   ```jsx
+   // Example: input/Dashboard.tsx can import from input/Chart.tsx
+   import Chart from './Chart';
+   ```
+
+3. **For external libraries**: Common libraries like React and lucide-react are already included. If you need additional libraries, you can modify the `setup-dev-server.js` file to include them in the `packageJson` object.
 
 ### Step 2: Set up and start the development server
 
@@ -69,6 +116,14 @@ npm run convert input/complex-flowchart.tsx --paper-size=Letter --margin=20
 3. It navigates to `http://localhost:5174/ComponentName` using Puppeteer
 4. It captures the rendered component as a PDF, automatically sizing the PDF to fit the content
 5. If multiple TSX files are provided, it merges them into a single PDF
+
+## Project Structure
+
+- `input/` - Place your TSX components here for export
+- `output/` - Exported PDFs are saved here
+- `frontend/` - Frontend UI source code
+- `src/` - Backend source code
+- `dev-server/` - Development server for rendering TSX components
 
 ## Examples
 

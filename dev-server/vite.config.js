@@ -36,5 +36,13 @@ export default defineConfig({
       input,
     },
   },
+  resolve: {
+    alias: {
+      // Allow components to import from the input directory
+      '@input': path.resolve(__dirname, '../input'),
+      // Allow components to import from the components directory
+      '@components': path.resolve(__dirname, '../input/components')
+    }
+  }
 });
   

@@ -6,11 +6,17 @@
   "main": "src/index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "start": "node src/index.js",
+    "start": "node run.js",
     "convert": "node src/cli.js",
-    "setup-dev-server": "node setup-dev-server.js"
+    "setup-dev-server": "node setup-dev-server.js",
+    "build-frontend": "node src/build-frontend.js",
+    "start-server": "node src/server.js",
+    "start-ui": "npm run build-frontend && npm run start-server"
   },
   "dependencies": {
+    "chalk": "^5.4.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.3",
     "lucide-react": "^0.476.0",
     "pdf-lib": "^1.17.1",
     "puppeteer": "^24.3.0",
