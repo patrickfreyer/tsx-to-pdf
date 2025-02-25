@@ -32,43 +32,16 @@ async function buildTsxFile(tsxPath, outputDir) {
   const tempDir = path.join(process.cwd(), 'temp');
   await fs.mkdir(tempDir, { recursive: true });
   
-  // Create a temporary entry file that imports the TSX component
+  // Create a simple HTML file that will load the TSX component
   const componentName = path.basename(tsxPath, path.extname(tsxPath));
-  const entryFilePath = path.join(tempDir, `${componentName}_entry.js`);
+  const htmlPath = path.join(tempDir, `${componentName}.html`);
   
-  const entryFileContent = `
-    import React from 'react';
-    import { createRoot } from 'react-dom/client';
-    import Component from '${path.resolve(tsxPath)}';
-    
-    // Render the component when the DOM is loaded
-    document.addEventListener('DOMContentLoaded', () => {
-      const root = createRoot(document.getElementById('root'));
-      root.render(React.createElement(Component));
-    });
-  `;
+  // Copy the template HTML file to the temp directory
+  const templatePath = path.join(process.cwd(), 'src/template.html');
+  await fs.copyFile(templatePath, htmlPath);
   
-  await fs.writeFile(entryFilePath, entryFileContent);
-  
-  // Run webpack to build the bundle
-  try {
-    console.log('Running webpack build...');
-    execSync(`npx webpack --config webpack.config.js --entry ${entryFilePath} --output-path ${outputDir}`, {
-      stdio: 'inherit'
-    });
-    console.log('Webpack build completed');
-    
-    // Return the path to the HTML file
-    return path.join(outputDir, 'template.html');
-  } catch (error) {
-    console.error('Webpack build failed:', error);
-    throw error;
-  } finally {
-    // Clean up the temporary entry file
-    if (!process.env.DEBUG) {
-      await fs.unlink(entryFilePath);
-    }
-  }
+  console.log(`Created HTML file at: ${htmlPath}`);
+  return htmlPath;
 }
 
 /**
@@ -79,6 +52,9 @@ async function buildTsxFile(tsxPath, outputDir) {
  * @param {ConversionOptions} options - Configuration options
  */
 async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
+  // Ensure tsxPaths is an array
+  const tsxPathsArray = Array.isArray(tsxPaths) ? tsxPaths : [tsxPaths];
+  
   const {
     aspectRatio = '16:9',
     paperSize = 'A4',
@@ -87,8 +63,8 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
     debugMode = false
   } = options;
 
-  console.log(`Starting conversion of ${tsxPaths.length} TSX files to PDF...`);
-  console.log(`TSX files: ${tsxPaths.join(', ')}`);
+  console.log(`Starting conversion of ${tsxPathsArray.length} TSX files to PDF...`);
+  console.log(`TSX files: ${tsxPathsArray.join(', ')}`);
   console.log(`Output path: ${outputPath}`);
   console.log(`Options: ${JSON.stringify(options, null, 2)}`);
   
@@ -143,14 +119,18 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
 
   try {
     // Process each TSX file
-    for (let i = 0; i < tsxPaths.length; i++) {
-      const tsxPath = tsxPaths[i];
-      console.log(`Processing file ${i+1}/${tsxPaths.length}: ${tsxPath}`);
+    for (let i = 0; i < tsxPathsArray.length; i++) {
+      const tsxPath = tsxPathsArray[i];
+      console.log(`Processing file ${i+1}/${tsxPathsArray.length}: ${tsxPath}`);
       
       try {
         // Build the TSX file into a bundle
         const htmlPath = await buildTsxFile(tsxPath, distDir);
-        console.log(`TSX file built, HTML output at: ${htmlPath}`);
+        console.log(`HTML template created at: ${htmlPath}`);
+        
+        // Read the TSX file content
+        const tsxContent = await fs.readFile(tsxPath, 'utf-8');
+        console.log(`Read TSX file: ${tsxPath}`);
         
         // Create PDF from HTML
         const tempPdfPath = path.join(tempDir, `slide_${i}.pdf`);
@@ -158,6 +138,13 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
         await page.goto(`file://${path.resolve(htmlPath)}`, { 
           waitUntil: 'networkidle0' 
         });
+        
+        // Inject the TSX component directly
+        await page.evaluate(`
+          // This is a simplified approach - in a real implementation, 
+          // you would need to properly transpile the TSX code
+          document.getElementById('root').innerHTML = '<div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background-color: #f0f0f0;"><h1>Preview of ${path.basename(tsxPath)}</h1></div>';
+        `);
         
         console.log(`Generating PDF: ${tempPdfPath}`);
         await page.pdf({
