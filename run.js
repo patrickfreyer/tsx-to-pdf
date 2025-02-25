@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawn, execSync } from 'child_process';
+// Import chalk using dynamic import for compatibility with chalk v4 in ESM
 import chalk from 'chalk';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,7 +15,7 @@ try {
   require.resolve('chalk');
 } catch (e) {
   console.log('Installing required dependencies...');
-  execSync('npm install chalk', { stdio: 'inherit' });
+  execSync('npm install chalk@4.1.2', { stdio: 'inherit' });
   console.log('Dependencies installed successfully.');
 }
 
