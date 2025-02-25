@@ -31,6 +31,8 @@ const ExportUI: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [exportMessage, setExportMessage] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'export' | 'files'>('export');
+  const [uploadStatus, setUploadStatus] = useState<string>('');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [options, setOptions] = useState<ExportOptions>({
     aspectRatio: '16:9',
     paperSize: 'A4',
@@ -48,23 +50,19 @@ const ExportUI: React.FC = () => {
         const response = await fetch(`${API_URL}/components`);
         const data = await response.json();
         
-        if (data.success && data.components) {
+        if (data.success) {
           setComponents(data.components);
           if (data.components.length > 0) {
             setSelectedComponent(data.components[0].file);
           }
-        } else {
-          console.error('Failed to fetch components:', data.message);
-          setExportMessage('Failed to fetch components: ' + data.message);
         }
       } catch (error) {
         console.error('Error fetching components:', error);
-        setExportMessage('Error fetching components. Is the server running?');
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     fetchComponents();
     fetchOutputFiles();
   }, []);
@@ -131,6 +129,61 @@ const ExportUI: React.FC = () => {
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    if (!file.name.endsWith('.tsx')) {
+      setUploadStatus('Error: Only .tsx files are allowed');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('tsxFile', file);
+    
+    try {
+      setIsUploading(true);
+      setUploadStatus('Uploading...');
+      
+      const response = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setUploadStatus(`Successfully uploaded ${file.name}`);
+        // Refresh the component list
+        const fetchComponentsAfterUpload = async () => {
+          try {
+            const response = await fetch(`${API_URL}/components`);
+            const data = await response.json();
+            
+            if (data.success) {
+              setComponents(data.components);
+              if (data.components.length > 0) {
+                setSelectedComponent(data.components[0].file);
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching components:', error);
+          }
+        };
+        
+        fetchComponentsAfterUpload();
+      } else {
+        setUploadStatus(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      setUploadStatus('Error uploading file. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
@@ -154,6 +207,31 @@ const ExportUI: React.FC = () => {
         
         {activeTab === 'export' ? (
           <>
+            {/* File Upload Section */}
+            <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h2 className="text-xl font-semibold mb-4">Upload New TSX File</h2>
+              <div className="flex flex-col space-y-4">
+                <label className="flex flex-col items-center px-4 py-6 bg-white text-blue-500 rounded-lg border border-blue-500 border-dashed cursor-pointer hover:bg-blue-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span className="mt-2 text-base">Select a TSX file to upload</span>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept=".tsx" 
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                  />
+                </label>
+                {uploadStatus && (
+                  <div className={`text-center p-2 rounded ${uploadStatus.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                    {uploadStatus}
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="mb-6">
               <label className="block text-gray-700 font-semibold mb-2">Select Component</label>
               <select

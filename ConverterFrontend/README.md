@@ -31,9 +31,10 @@ The frontend provides a user-friendly interface with two main tabs:
 
 The Export tab allows users to:
 
-1. Select a TSX component to export
-2. Configure export options (aspect ratio, paper size, orientation, etc.)
-3. Export the component to PDF
+1. Upload new TSX components directly through the UI
+2. Select a TSX component to export
+3. Configure export options (aspect ratio, paper size, orientation, etc.)
+4. Export the component to PDF
 
 ### Output Files Tab
 
@@ -48,6 +49,7 @@ The Output Files tab allows users to:
 
 The frontend uses the following API endpoints:
 
-- `GET /api/components` - Get a list of available components
+- `GET /api/components` - Get a list of available TSX components
 - `GET /api/output-files` - Get a list of exported PDF files
-- `POST /api/export` - Export a component to PDF 
+- `POST /api/export` - Export a TSX component to PDF
+- `POST /api/upload` - Upload a new TSX component file 

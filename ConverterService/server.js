@@ -2,13 +2,43 @@ import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { listComponents, exportComponent, listOutputFiles } from './api.js';
+import { listComponents, exportComponent, listOutputFiles, saveUploadedFile } from './api.js';
+import multer from 'multer';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '..', 'input');
+    // Ensure the directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Keep the original filename
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    // Accept only .tsx files
+    if (file.originalname.endsWith('.tsx')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only .tsx files are allowed'), false);
+    }
+  }
+});
 
 // Middleware
 app.use(cors());
@@ -56,6 +86,29 @@ app.post('/api/export', async (req, res) => {
       message: 'Failed to export component', 
       error: error.message,
       command: error.command
+    });
+  }
+});
+
+// New endpoint for file uploads
+app.post('/api/upload', upload.single('tsxFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    
+    const result = await saveUploadedFile(req.file);
+    res.json({ 
+      success: true, 
+      message: 'File uploaded successfully', 
+      file: result 
+    });
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to upload file', 
+      error: error.message 
     });
   }
 });

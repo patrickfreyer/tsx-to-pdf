@@ -45,6 +45,7 @@ The UI provides a simple and intuitive way to export your TSX components without
 ### Export Tab
 
 The Export tab allows you to:
+- Upload new TSX components directly through the UI
 - Select a component from the input directory
 - Set the output file name
 - Configure export options

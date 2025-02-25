@@ -186,4 +186,35 @@ export async function exportComponent(componentFile, outputFile, options = {}) {
       });
     });
   });
+}
+
+/**
+ * Saves an uploaded TSX file and returns information about it
+ * @param {Object} file - The uploaded file object from multer
+ * @returns {Promise<Object>} Information about the saved file
+ */
+export async function saveUploadedFile(file) {
+  try {
+    // The file is already saved by multer, so we just need to return the information
+    const componentName = file.originalname.replace('.tsx', '')
+      .split('-')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+    
+    const routeName = file.originalname.replace('.tsx', '')
+      .split('-')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('');
+    
+    return {
+      file: file.originalname,
+      componentName,
+      routeName,
+      path: file.path,
+      size: file.size
+    };
+  } catch (error) {
+    console.error('Error saving uploaded file:', error);
+    throw error;
+  }
 } 
