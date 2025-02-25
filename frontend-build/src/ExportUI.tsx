@@ -21,7 +21,21 @@ interface ExportOptions {
   debug: boolean;
 }
 
-const API_URL = 'http://localhost:3000/api';
+// Dynamic API URL that works in both local development and Replit
+const getApiUrl = () => {
+  // Check if we're in a Replit environment
+  const isReplit = window.location.hostname.includes('replit');
+  
+  if (isReplit) {
+    // Use the current origin (Replit domain)
+    return `${window.location.origin}/api`;
+  }
+  
+  // Default to localhost for local development
+  return 'http://localhost:3000/api';
+};
+
+const API_URL = getApiUrl();
 
 const ExportUI: React.FC = () => {
   const [components, setComponents] = useState<Component[]>([]);
