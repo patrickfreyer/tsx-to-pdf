@@ -157,6 +157,7 @@ app.get('*', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`In Replit, access at: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`);
 }); 
