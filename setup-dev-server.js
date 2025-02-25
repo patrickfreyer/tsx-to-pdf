@@ -26,7 +26,7 @@ async function setupDevServer() {
     version: "1.0.0",
     type: "module",
     scripts: {
-      "dev": "vite --port 5173",
+      "dev": "vite --port 5174",
       "build": "vite build",
       "preview": "vite preview"
     },
@@ -217,7 +217,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   console.log('1. cd dev-server');
   console.log('2. npm install');
   console.log('3. npm run dev');
-  console.log('The server will be available at http://localhost:5173');
+  console.log('The server will be available at http://localhost:5174');
 }
 
 setupDevServer().catch(err => {

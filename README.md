@@ -6,7 +6,7 @@ A tool to convert React TSX components to PDF files with proper formatting.
 
 - Node.js (v14 or higher)
 - npm or yarn
-- A development server running at http://localhost:5173 that can serve your TSX components
+- A development server running at http://localhost:5174 that can serve your TSX components
 
 ## Installation
 
@@ -18,7 +18,7 @@ npm install
 
 ### Step 1: Start your development server
 
-Before using this tool, you need to have a development server running at http://localhost:5173 that can serve your TSX components.
+Before using this tool, you need to have a development server running at http://localhost:5174 that can serve your TSX components.
 
 For example, if you're using Vite, you can start the server with:
 
@@ -27,7 +27,7 @@ npm run dev
 ```
 
 Make sure your server is configured to serve each component at a URL like:
-`http://localhost:5173/ComponentName`
+`http://localhost:5174/ComponentName`
 
 Where `ComponentName` is the name of your TSX file without the extension.
 
@@ -55,7 +55,7 @@ npm run convert examples/ComplexFlowchart.tsx --paper-size=Letter --orientation=
 
 1. The tool takes a TSX file as input
 2. It extracts the component name from the file name
-3. It navigates to `http://localhost:5173/ComponentName` using Puppeteer
+3. It navigates to `http://localhost:5174/ComponentName` using Puppeteer
 4. It captures the rendered component as a PDF
 5. If multiple TSX files are provided, it merges them into a single PDF
 
