@@ -16,18 +16,22 @@ const colors = {
   green: (text) => `\x1b[32m${text}\x1b[0m`,
   red: (text) => `\x1b[31m${text}\x1b[0m`,
   yellow: (text) => `\x1b[33m${text}\x1b[0m`,
+  cyan: (text) => `\x1b[36m${text}\x1b[0m`,
   bold: (text) => `\x1b[1m${text}\x1b[0m`
 };
 
 // Create a simple chalk-like API
+// We need to make each color both a function and an object with methods
 const chalk = {
-  blue: {
-    bold: (text) => colors.blue(colors.bold(text))
-  },
   green: (text) => colors.green(text),
   red: (text) => colors.red(text),
-  yellow: (text) => colors.yellow(text)
+  yellow: (text) => colors.yellow(text),
+  cyan: (text) => colors.cyan(text)
 };
+
+// Make blue both a function and an object with a bold method
+chalk.blue = (text) => colors.blue(text);
+chalk.blue.bold = (text) => colors.blue(colors.bold(text));
 
 // Remove the chalk installation check since we're not using it anymore
 // try {
