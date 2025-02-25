@@ -1,0 +1,35 @@
+{
+  "name": "tsx-to-pdf",
+  "version": "1.0.0",
+  "description": "Convert TSX files to PDF with proper formatting",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "start": "node src/index.js",
+    "convert": "node src/cli.js"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^24.3.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.9",
+    "@babel/preset-typescript": "^7.26.9",
+    "@types/react": "^18.2.67",
+    "@types/react-dom": "^18.2.22",
+    "babel-loader": "^9.1.3",
+    "css-loader": "^6.10.0",
+    "html-webpack-plugin": "^5.6.0",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.7.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
