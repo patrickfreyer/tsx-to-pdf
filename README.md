@@ -44,11 +44,13 @@ Options:
 - `--paper-size`: PDF paper size ('A4' or 'Letter', default: 'A4')
 - `--orientation`: PDF orientation ('portrait' or 'landscape', default: 'landscape')
 - `--margin`: Margin in pixels (default: 0)
+- `--auto-size`: Automatically adjust PDF size to fit content (default: true)
+- `--no-auto-size`: Disable automatic sizing and use fixed dimensions
 - `--debug`: Debug mode, keeps temporary files (default: false)
 
 Example:
 ```bash
-npm run convert examples/ComplexFlowchart.tsx --paper-size=Letter --orientation=landscape
+npm run convert examples/ComplexFlowchart.tsx --paper-size=Letter --margin=20
 ```
 
 ## How It Works
@@ -56,7 +58,7 @@ npm run convert examples/ComplexFlowchart.tsx --paper-size=Letter --orientation=
 1. The tool takes a TSX file as input
 2. It extracts the component name from the file name
 3. It navigates to `http://localhost:5174/ComponentName` using Puppeteer
-4. It captures the rendered component as a PDF
+4. It captures the rendered component as a PDF, automatically sizing the PDF to fit the content
 5. If multiple TSX files are provided, it merges them into a single PDF
 
 ## Examples

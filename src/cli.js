@@ -44,6 +44,11 @@ yargs(hideBin(process.argv))
           type: 'number',
           default: 0,
         })
+        .option('auto-size', {
+          describe: 'Automatically adjust PDF size to fit content',
+          type: 'boolean',
+          default: true,
+        })
         .option('debug', {
           describe: 'Debug mode (keeps temporary files)',
           type: 'boolean',
@@ -68,6 +73,7 @@ yargs(hideBin(process.argv))
           paperSize: argv['paper-size'],
           orientation: argv.orientation,
           margin: argv.margin,
+          autoSize: argv['auto-size'],
           debugMode: argv.debug,
         });
       } catch (err) {

@@ -15,6 +15,7 @@ const __dirname = path.dirname(__filename);
  * @property {string} paperSize - PDF paper size (e.g., 'A4', 'Letter')
  * @property {string} orientation - PDF orientation ('portrait' or 'landscape')
  * @property {number} margin - Margin in pixels
+ * @property {boolean} autoSize - Automatically adjust PDF size to fit content
  * @property {boolean} debugMode - If true, keeps temporary files for debugging
  */
 
@@ -107,6 +108,7 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
     paperSize = 'A4',
     orientation = 'landscape',
     margin = 0,
+    autoSize = true,
     debugMode = false
   } = options;
 
@@ -159,7 +161,7 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
     width = Math.round(height * aspectRatioValue);
   }
   
-  console.log(`Setting viewport to ${width}x${height} (${aspectRatio})`);
+  console.log(`Setting initial viewport to ${width}x${height} (${aspectRatio})`);
   // Set viewport to match desired aspect ratio
   await page.setViewport({ width, height });
 
@@ -189,25 +191,72 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
         await page.waitForSelector('#root > *', { timeout: 10000 });
         
         // Optional: Wait a bit more to ensure all animations and resources are loaded
-        // Use setTimeout instead of waitForTimeout
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        console.log(`Generating PDF: ${tempPdfPath}`);
-        await page.pdf({
-          path: tempPdfPath,
-          width: width + 'px',
-          height: height + 'px',
-          margin: {
-            top: margin + 'px',
-            right: margin + 'px',
-            bottom: margin + 'px',
-            left: margin + 'px'
-          },
-          printBackground: true,
-          pageRanges: '1',
+        // Get the actual dimensions of the content
+        const dimensions = await page.evaluate(() => {
+          const rootElement = document.querySelector('#root > *');
+          if (!rootElement) return null;
+          
+          // Get the bounding box of the content
+          const rect = rootElement.getBoundingClientRect();
+          
+          return {
+            width: Math.ceil(rect.width),
+            height: Math.ceil(rect.height)
+          };
         });
-        console.log(`PDF generated: ${tempPdfPath}`);
         
+        // Adjust viewport and PDF dimensions based on content
+        if (autoSize && dimensions && dimensions.width > 0 && dimensions.height > 0) {
+          // Add some padding
+          const pdfWidth = dimensions.width + (margin * 2);
+          const pdfHeight = dimensions.height + (margin * 2);
+          
+          console.log(`Auto-adjusting PDF size to content: ${pdfWidth}x${pdfHeight}`);
+          
+          // Update viewport to match content
+          await page.setViewport({ 
+            width: pdfWidth, 
+            height: pdfHeight 
+          });
+          
+          // Wait for the page to adjust
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          console.log(`Generating PDF with content-based dimensions: ${tempPdfPath}`);
+          await page.pdf({
+            path: tempPdfPath,
+            width: `${pdfWidth}px`,
+            height: `${pdfHeight}px`,
+            margin: {
+              top: `${margin}px`,
+              right: `${margin}px`,
+              bottom: `${margin}px`,
+              left: `${margin}px`
+            },
+            printBackground: true,
+            pageRanges: '1',
+          });
+        } else {
+          // Fallback to default dimensions if content dimensions couldn't be determined
+          console.log(`Using default dimensions for PDF: ${width}x${height}`);
+          await page.pdf({
+            path: tempPdfPath,
+            width: `${width}px`,
+            height: `${height}px`,
+            margin: {
+              top: `${margin}px`,
+              right: `${margin}px`,
+              bottom: `${margin}px`,
+              left: `${margin}px`
+            },
+            printBackground: true,
+            pageRanges: '1',
+          });
+        }
+        
+        console.log(`PDF generated: ${tempPdfPath}`);
         tempPdfPaths.push(tempPdfPath);
       } catch (err) {
         console.error(`Error processing file ${tsxPath}:`, err);
