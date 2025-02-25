@@ -3,6 +3,7 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import convertTsxToPdf from './index.js';
+import path from 'path';
 
 // Parse command line arguments
 yargs(hideBin(process.argv))
@@ -17,7 +18,7 @@ yargs(hideBin(process.argv))
           array: true,
         })
         .positional('output', {
-          describe: 'Output PDF path',
+          describe: 'Output PDF path (will be saved in the output/ directory by default)',
           type: 'string',
           default: 'output.pdf',
         })
@@ -47,11 +48,18 @@ yargs(hideBin(process.argv))
           describe: 'Debug mode (keeps temporary files)',
           type: 'boolean',
           default: false,
-        });
+        })
+        .epilogue('All PDFs will be saved to the output/ directory by default unless an absolute path is provided.');
     },
     async (argv) => {
       try {
-        await convertTsxToPdf(argv.files, argv.output, {
+        // Ensure output path is properly formatted
+        let outputPath = argv.output;
+        if (!path.isAbsolute(outputPath) && !outputPath.startsWith('output/')) {
+          console.log(`Note: Output will be saved to the output/ directory: ${path.join('output', outputPath)}`);
+        }
+        
+        await convertTsxToPdf(argv.files, outputPath, {
           aspectRatio: argv['aspect-ratio'],
           paperSize: argv['paper-size'],
           orientation: argv.orientation,
