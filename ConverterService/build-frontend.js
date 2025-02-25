@@ -168,7 +168,7 @@ export default {
   
   // Copy ExportUI.tsx from frontend directory to build directory
   try {
-    const exportUiContent = await fs.readFile(path.join(__dirname, '..', 'frontend', 'src', 'ExportUI.tsx'), 'utf-8');
+    const exportUiContent = await fs.readFile(path.join(__dirname, '..', 'ConverterFrontend', 'src', 'ExportUI.tsx'), 'utf-8');
     await fs.writeFile(path.join(srcDir, 'ExportUI.tsx'), exportUiContent);
     console.log('Copied ExportUI.tsx to frontend build directory');
   } catch (err) {

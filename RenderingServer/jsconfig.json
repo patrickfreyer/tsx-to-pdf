@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@input/*": [
+        "../input/*"
+      ],
+      "@components/*": [
+        "../input/components/*"
+      ]
+    }
+  }
+}

@@ -13,6 +13,6 @@
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*", "examples/**/*"],
+  "include": ["ConverterService/**/*", "examples/**/*"],
   "exclude": ["node_modules", "dist"]
 }

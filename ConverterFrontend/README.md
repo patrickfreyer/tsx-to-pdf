@@ -25,20 +25,29 @@ Or simply run `npm run start-ui` to build and start the server in one command.
 
 ## How It Works
 
-The frontend provides a user-friendly interface for:
+The frontend provides a user-friendly interface with two main tabs:
 
-1. Selecting a TSX component to export
-2. Configuring export options (aspect ratio, paper size, orientation, etc.)
-3. Exporting the component to PDF
+### Export Tab
 
-The frontend communicates with the backend API to:
+The Export tab allows users to:
 
-- Fetch the list of available components
-- Send export requests
+1. Select a TSX component to export
+2. Configure export options (aspect ratio, paper size, orientation, etc.)
+3. Export the component to PDF
+
+### Output Files Tab
+
+The Output Files tab allows users to:
+
+1. View a list of all exported PDF files
+2. See file details (size, creation date)
+3. View PDFs directly in the browser
+4. Download PDFs to their computer
 
 ## API Endpoints
 
 The frontend uses the following API endpoints:
 
 - `GET /api/components` - Get a list of available components
+- `GET /api/output-files` - Get a list of exported PDF files
 - `POST /api/export` - Export a component to PDF 

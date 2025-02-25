@@ -138,8 +138,8 @@ npm run convert input/complex-flowchart.tsx --paper-size=Letter --margin=20
 
 - `input/` - Place your TSX components here for export
 - `output/` - Exported PDFs are saved here
-- `frontend/` - Frontend UI source code
-- `src/` - Backend source code
+- `ConverterFrontend/` - Frontend UI source code
+- `ConverterService/` - Backend source code
 - `dev-server/` - Development server for rendering TSX components
 
 ## Examples

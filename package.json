@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "Convert TSX files to PDF with proper formatting",
   "type": "module",
-  "main": "src/index.js",
+  "main": "ConverterService/index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "start": "node run.js",
-    "convert": "node src/cli.js",
+    "convert": "node ConverterService/cli.js",
     "setup-dev-server": "node setup-dev-server.js",
-    "build-frontend": "node src/build-frontend.js",
-    "start-server": "node src/server.js",
+    "build-frontend": "node ConverterService/build-frontend.js",
+    "start-server": "node ConverterService/server.js",
     "start-ui": "npm run build-frontend && npm run start-server"
   },
   "dependencies": {
