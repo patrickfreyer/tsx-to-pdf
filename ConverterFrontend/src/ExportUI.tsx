@@ -21,7 +21,10 @@ interface ExportOptions {
   debug: boolean;
 }
 
-const API_URL = 'http://localhost:3000/api';
+// Dynamically determine the API URL based on the current environment
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api' 
+  : `${window.location.origin}/api`;
 
 const ExportUI: React.FC = () => {
   const [components, setComponents] = useState<Component[]>([]);
