@@ -19,11 +19,57 @@ const __dirname = path.dirname(__filename);
  */
 
 /**
+ * Extracts style information from a TSX file
+ * 
+ * @param {string} tsxContent - The content of the TSX file
+ * @returns {Object} - An object containing extracted style information
+ */
+function extractStylesFromTsx(tsxContent) {
+  // This is a simplified approach - in a real implementation,
+  // you would need to properly parse the TSX code
+  
+  // Extract background color or gradient
+  let background = '#ffffff';
+  const bgMatch = tsxContent.match(/background:\s*['"]([^'"]+)['"]/);
+  if (bgMatch) {
+    background = bgMatch[1];
+  }
+  
+  // Extract text color
+  let color = '#000000';
+  const colorMatch = tsxContent.match(/color:\s*['"]([^'"]+)['"]/);
+  if (colorMatch) {
+    color = colorMatch[1];
+  }
+  
+  // Extract title
+  let title = '';
+  const h1Match = tsxContent.match(/<h1[^>]*>(.*?)<\/h1>/s);
+  if (h1Match) {
+    title = h1Match[1].trim();
+  }
+  
+  // Extract paragraph text
+  let paragraph = '';
+  const pMatch = tsxContent.match(/<p[^>]*>(.*?)<\/p>/s);
+  if (pMatch) {
+    paragraph = pMatch[1].trim();
+  }
+  
+  return {
+    background,
+    color,
+    title,
+    paragraph
+  };
+}
+
+/**
  * Builds a TSX file into a JavaScript bundle
  * 
  * @param {string} tsxPath - Path to the TSX file
  * @param {string} outputDir - Directory to output the bundle
- * @returns {Promise<string>} - Path to the built HTML file
+ * @returns {Promise<{htmlPath: string, styles: Object}>} - Path to the built HTML file and extracted styles
  */
 async function buildTsxFile(tsxPath, outputDir) {
   console.log(`Building TSX file: ${tsxPath}`);
@@ -40,8 +86,15 @@ async function buildTsxFile(tsxPath, outputDir) {
   const templatePath = path.join(process.cwd(), 'src/template.html');
   await fs.copyFile(templatePath, htmlPath);
   
+  // Read the TSX file content
+  const tsxContent = await fs.readFile(tsxPath, 'utf-8');
+  console.log(`Read TSX file: ${tsxPath}`);
+  
+  // Extract styles from the TSX content
+  const styles = extractStylesFromTsx(tsxContent);
+  
   console.log(`Created HTML file at: ${htmlPath}`);
-  return htmlPath;
+  return { htmlPath, styles };
 }
 
 /**
@@ -125,12 +178,8 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
       
       try {
         // Build the TSX file into a bundle
-        const htmlPath = await buildTsxFile(tsxPath, distDir);
+        const { htmlPath, styles } = await buildTsxFile(tsxPath, distDir);
         console.log(`HTML template created at: ${htmlPath}`);
-        
-        // Read the TSX file content
-        const tsxContent = await fs.readFile(tsxPath, 'utf-8');
-        console.log(`Read TSX file: ${tsxPath}`);
         
         // Create PDF from HTML
         const tempPdfPath = path.join(tempDir, `slide_${i}.pdf`);
@@ -139,12 +188,48 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
           waitUntil: 'networkidle0' 
         });
         
-        // Inject the TSX component directly
-        await page.evaluate(`
-          // This is a simplified approach - in a real implementation, 
-          // you would need to properly transpile the TSX code
-          document.getElementById('root').innerHTML = '<div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background-color: #f0f0f0;"><h1>Preview of ${path.basename(tsxPath)}</h1></div>';
-        `);
+        // Inject the TSX component directly with extracted styles
+        await page.evaluate(({ styles, filename }) => {
+          // Create a styled representation of the component
+          const root = document.getElementById('root');
+          
+          // Apply styles from the TSX file
+          root.innerHTML = `
+            <div style="
+              width: 100%;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              background: ${styles.background};
+              color: ${styles.color};
+              font-family: Arial, sans-serif;
+              padding: 2em;
+            ">
+              <h1 style="
+                font-size: 3em;
+                margin-bottom: 0.5em;
+                text-align: center;
+              ">
+                ${styles.title || filename}
+              </h1>
+              ${styles.paragraph ? `
+                <p style="
+                  font-size: 1.5em;
+                  max-width: 80%;
+                  text-align: center;
+                  line-height: 1.4;
+                ">
+                  ${styles.paragraph}
+                </p>
+              ` : ''}
+            </div>
+          `;
+        }, { 
+          styles, 
+          filename: path.basename(tsxPath, path.extname(tsxPath)) 
+        });
         
         console.log(`Generating PDF: ${tempPdfPath}`);
         await page.pdf({
