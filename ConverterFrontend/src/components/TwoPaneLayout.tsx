@@ -181,20 +181,31 @@ const TwoPaneLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="w-full">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">TSX to PDF Converter</h1>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Pane - Preview */}
-          <div className="bg-white rounded-lg shadow-md p-4 h-[calc(100vh-200px)]">
-            <h2 className="text-xl font-semibold mb-4 border-b pb-2">Preview</h2>
-            <PreviewPane selectedComponents={selectedComponents} />
+          <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 p-6 h-[calc(100vh-220px)]">
+            <h2 className="text-xl font-semibold mb-4 pb-3 border-b border-white/20 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+              </svg>
+              Component Preview
+            </h2>
+            <div className="h-[calc(100%-3rem)]">
+              <PreviewPane selectedComponents={selectedComponents} />
+            </div>
           </div>
           
           {/* Right Pane - Configuration */}
-          <div className="bg-white rounded-lg shadow-md p-4 h-[calc(100vh-200px)] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4 border-b pb-2">Configuration</h2>
+          <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 p-6 h-[calc(100vh-220px)] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4 pb-3 border-b border-white/20 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+              </svg>
+              Configuration
+            </h2>
             <ConfigurationPane 
               components={components}
               selectedComponents={selectedComponents}
