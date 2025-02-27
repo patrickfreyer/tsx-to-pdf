@@ -4,8 +4,8 @@ import TwoPaneLayout from './components/TwoPaneLayout';
 const ExportUI: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-      <div className="container mx-auto px-4 py-6">
-        <header className="mb-8">
+      <div className="w-full px-4 py-3">
+        <header className="mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">

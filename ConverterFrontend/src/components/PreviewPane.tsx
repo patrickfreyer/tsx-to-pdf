@@ -38,11 +38,11 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ selectedComponents }) => {
     <div className="h-full flex flex-col">
       {/* Tabs for multiple components */}
       {selectedComponents.length > 1 && (
-        <div className="flex border-b border-white/20 mb-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        <div className="flex border-b border-white/20 mb-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
           {selectedComponents.map((component) => (
             <button
               key={component.file}
-              className={`py-2 px-4 font-medium text-sm whitespace-nowrap transition-colors ${
+              className={`py-1.5 px-3 font-medium text-sm whitespace-nowrap transition-colors ${
                 activeTab === component.file
                   ? 'text-blue-400 border-b-2 border-blue-400'
                   : 'text-gray-400 hover:text-gray-200'
@@ -59,15 +59,15 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ selectedComponents }) => {
       <div className="flex-grow relative bg-black/30 rounded-lg overflow-hidden">
         {activeComponent && (
           <>
-            <div className="absolute top-0 left-0 right-0 h-8 bg-black/40 flex items-center px-3 text-xs text-gray-300">
+            <div className="absolute top-0 left-0 right-0 h-6 bg-black/40 flex items-center px-3 text-xs text-gray-300">
               <div className="flex space-x-1.5 mr-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
               </div>
               <span className="opacity-70">Preview: {activeComponent.componentName}</span>
             </div>
-            <div className="pt-8 h-full">
+            <div className="pt-6 h-full">
               <iframe
                 src={`http://localhost:5174/${activeComponent.routeName}`}
                 className="w-full h-full border-0 bg-white"
