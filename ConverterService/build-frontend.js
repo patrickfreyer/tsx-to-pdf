@@ -21,7 +21,7 @@ async function buildFrontend() {
   }
   
   // Create a temporary frontend build directory
-  const frontendBuildDir = path.join(__dirname, '..', 'frontend-build');
+  const frontendBuildDir = path.join(__dirname, '..', 'temp', 'frontend-build');
   try {
     await fs.mkdir(frontendBuildDir, { recursive: true });
     console.log(`Created frontend build directory at: ${frontendBuildDir}`);
@@ -171,6 +171,35 @@ export default {
     const exportUiContent = await fs.readFile(path.join(__dirname, '..', 'ConverterFrontend', 'src', 'ExportUI.tsx'), 'utf-8');
     await fs.writeFile(path.join(srcDir, 'ExportUI.tsx'), exportUiContent);
     console.log('Copied ExportUI.tsx to frontend build directory');
+    
+    // Create components directory in the build directory
+    const componentsSrcDir = path.join(__dirname, '..', 'ConverterFrontend', 'src', 'components');
+    const componentsDestDir = path.join(srcDir, 'components');
+    
+    try {
+      // Check if components directory exists in the source
+      await fs.access(componentsSrcDir);
+      
+      // Create components directory in the destination
+      await fs.mkdir(componentsDestDir, { recursive: true });
+      
+      // Read all files in the components directory
+      const componentFiles = await fs.readdir(componentsSrcDir);
+      
+      // Copy each component file
+      for (const file of componentFiles) {
+        const srcFilePath = path.join(componentsSrcDir, file);
+        const destFilePath = path.join(componentsDestDir, file);
+        
+        const fileContent = await fs.readFile(srcFilePath, 'utf-8');
+        await fs.writeFile(destFilePath, fileContent);
+      }
+      
+      console.log('Copied components directory to frontend build directory');
+    } catch (err) {
+      console.error('Error copying components directory:', err);
+      // Continue even if components directory doesn't exist or can't be copied
+    }
   } catch (err) {
     console.error('Error copying ExportUI.tsx:', err);
     process.exit(1);
