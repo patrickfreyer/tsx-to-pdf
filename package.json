@@ -6,12 +6,14 @@
   "main": "ConverterService/index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "start": "node run.js",
+    "start": "node start-all.js",
+    "start-legacy": "node run.js",
     "convert": "node ConverterService/cli.js",
     "setup-dev-server": "node setup-dev-server.js",
     "build-frontend": "node ConverterService/build-frontend.js",
     "start-server": "node ConverterService/server.js",
-    "start-ui": "npm run build-frontend && npm run start-server"
+    "start-ui": "npm run build-frontend && npm run start-server",
+    "start-dev-server": "cd RenderingServer && npm run dev"
   },
   "dependencies": {
     "cors": "^2.8.5",

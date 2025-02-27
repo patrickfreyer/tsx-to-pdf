@@ -2,6 +2,7 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
+import { exec } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -205,6 +206,22 @@ export async function saveUploadedFile(file) {
       .split('-')
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
       .join('');
+    
+    // Trigger the component update by running the setup-dev-server script
+    // This will update the frontend-build server with the new component
+    try {
+      console.log('Updating frontend-build server with new component...');
+      exec('node setup-dev-server.js', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
+        if (error) {
+          console.error('Error updating frontend-build server:', error);
+          return;
+        }
+        console.log('Frontend-build server updated successfully');
+      });
+    } catch (updateError) {
+      console.error('Error triggering component update:', updateError);
+      // Continue even if update fails, as the file is already saved
+    }
     
     return {
       file: file.originalname,

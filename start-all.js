@@ -1,16 +1,14 @@
 #!/usr/bin/env node
 
-import fs from 'fs/promises';
+import { spawn, execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { spawn, execSync } from 'child_process';
-// Remove the direct chalk import and use a simple color function instead
-// import chalk from 'chalk';
+import fs from 'fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Simple color functions to replace chalk
+// Simple color functions
 const colors = {
   blue: (text) => `\x1b[34m${text}\x1b[0m`,
   green: (text) => `\x1b[32m${text}\x1b[0m`,
@@ -21,7 +19,6 @@ const colors = {
 };
 
 // Create a simple chalk-like API
-// We need to make each color both a function and an object with methods
 const chalk = {
   green: (text) => colors.green(text),
   red: (text) => colors.red(text),
@@ -29,27 +26,12 @@ const chalk = {
   cyan: (text) => colors.cyan(text)
 };
 
-// Make blue both a function and an object with a bold method
 chalk.blue = (text) => colors.blue(text);
 chalk.blue.bold = (text) => colors.blue(colors.bold(text));
 
-// Remove the chalk installation check since we're not using it anymore
-// try {
-//   require.resolve('chalk');
-// } catch (e) {
-//   console.log('Installing required dependencies...');
-//   execSync('npm install chalk@4.1.2', { stdio: 'inherit' });
-//   console.log('Dependencies installed successfully.');
-// }
-
-async function run() {
+async function startAll() {
   console.log(chalk.blue.bold('\n=== TSX to PDF Converter ===\n'));
-  
-  // Check if running in Replit
-  const isReplit = process.env.REPL_SLUG && process.env.REPL_OWNER;
-  if (isReplit) {
-    console.log(chalk.green(`Running in Replit environment: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`));
-  }
+  console.log(chalk.blue('Starting all services...'));
   
   // Step 1: Ensure input directory exists
   const inputDir = path.join(__dirname, 'input');
@@ -125,6 +107,7 @@ async function run() {
   });
   
   // Wait for server to start
+  console.log(chalk.yellow('Waiting for development server to start...'));
   await new Promise(resolve => setTimeout(resolve, 3000));
   
   // Step 5: Build and start the UI server
@@ -160,10 +143,13 @@ async function run() {
     });
     
     // Wait for UI server to start
+    console.log(chalk.yellow('Waiting for UI server to start...'));
     await new Promise(resolve => setTimeout(resolve, 2000));
     console.log(chalk.green('✓ UI server started successfully'));
     
-    // Process component files to get their routes
+    // Display available components and conversion commands
+    console.log(chalk.blue.bold('\n=== Available Components ===\n'));
+    
     const components = tsxFiles.map(file => {
       const componentName = file.replace('.tsx', '');
       const routeName = componentName
@@ -173,9 +159,6 @@ async function run() {
       
       return { file, componentName, routeName };
     });
-    
-    // Display available components and conversion commands
-    console.log(chalk.blue.bold('\n=== Available Components ===\n'));
     
     components.forEach(({ file, componentName, routeName }) => {
       console.log(chalk.green(`• ${componentName}`));
@@ -223,7 +206,7 @@ async function run() {
   }
 }
 
-run().catch(err => {
+startAll().catch(err => {
   console.error(chalk.red('Error:'), err);
   process.exit(1);
 }); 

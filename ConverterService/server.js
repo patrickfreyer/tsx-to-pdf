@@ -138,7 +138,7 @@ app.post('/api/upload', upload.single('tsxFile'), async (req, res) => {
     const result = await saveUploadedFile(req.file);
     res.json({ 
       success: true, 
-      message: 'File uploaded successfully', 
+      message: 'File uploaded successfully and server is being updated. The new component will be available shortly.', 
       file: result 
     });
   } catch (error) {
