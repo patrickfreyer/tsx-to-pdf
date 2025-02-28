@@ -22,7 +22,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ selectedComponents }) => {
 
   if (selectedComponents.length === 0) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-black/20 rounded-lg border border-white/10">
+      <div className="h-full flex flex-col items-center justify-center bg-transparent">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
@@ -56,18 +56,18 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ selectedComponents }) => {
       )}
 
       {/* Preview iframe with loading indicator */}
-      <div className="flex-grow relative bg-black/30 rounded-lg overflow-hidden">
+      <div className="flex-grow relative bg-transparent overflow-hidden">
         {activeComponent && (
           <>
-            <div className="absolute top-0 left-0 right-0 h-6 bg-black/40 flex items-center px-3 text-xs text-gray-300">
-              <div className="flex space-x-1.5 mr-3">
-                <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+            <div className="absolute top-0 left-0 right-0 h-7 bg-black/50 flex items-center px-3 text-xs text-gray-300 rounded-t-lg z-10">
+              <div className="flex space-x-2 mr-3">
+                <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors"></div>
               </div>
               <span className="opacity-70">Preview: {activeComponent.componentName}</span>
             </div>
-            <div className="pt-6 h-full">
+            <div className="pt-7 h-full">
               <iframe
                 src={`http://localhost:5174/${activeComponent.routeName}`}
                 className="w-full h-full border-0 bg-white"
