@@ -55,11 +55,29 @@ const airports = {
   "Beijing": [39.9042, 116.4074],
   "Shenzhen": [22.5431, 114.0579],
   "Toronto": [43.6532, -79.3832],
-  "Halifax": [44.6488, -63.5752]
+  "Halifax": [44.6488, -63.5752],
+  // New airports for 2021 flights
+  "Griechenland": [39.0742, 21.8243], // Using central Greece coordinates
+  "Aruba": [12.5211, -69.9683],
+  // New airports for 2025 flights
+  "San Diego": [32.7157, -117.1611],
+  "Madrid": [40.4168, -3.7038],
+  "Cologne": [50.9375, 6.9603] // Same as Köln, added for clarity
 };
 
 // Flight data
 const flights = [
+  // 2021 flights
+  ["Frankfurt", "London", "May", "Lufthansa"],
+  ["London", "Frankfurt", "May", "Lufthansa"],
+  ["Frankfurt", "Griechenland", "June", "Lufthansa"],
+  ["Griechenland", "Frankfurt", "June", "Lufthansa"],
+  ["Frankfurt", "New York", "July", "Lufthansa"],
+  ["New York", "Aruba", "July", "United"],
+  ["Aruba", "New York", "August", "United"],
+  ["New York", "Frankfurt", "August", "Lufthansa"],
+  ["Frankfurt", "Nursultan", "September", "Lufthansa"],
+  
   // 2023 flights
   ["Muscat", "Doha", "Jan", "Qatar"],
   ["Doha", "Frankfurt", "Jan", "Qatar"],
@@ -248,7 +266,18 @@ const flights = [
   ["Toronto", "Halifax", "November", "Air Canada"],
   ["Halifax", "Toronto", "November", "Air Canada"],
   ["Toronto", "New York", "November", "Air Canada"],
-  ["New York", "Munich", "December", "Lufthansa"]
+  ["New York", "Munich", "December", "Lufthansa"],
+  // 2025 flights
+  ["Munich", "Cologne", "Jan", "Lufthansa"],
+  ["Cologne", "Munich", "Jan", "Lufthansa"],
+  ["Munich", "New York", "Jan", "Lufthansa"],
+  ["New York", "San Diego", "Feb", "Delta"],
+  ["San Diego", "New York", "Mar", "Delta"],
+  ["New York", "Munich", "Mar", "Lufthansa"],
+  ["Munich", "Madrid", "Mar", "Lufthansa"],
+  ["Madrid", "Munich", "Mar", "Lufthansa"],
+  ["Munich", "New York", "Mar", "Lufthansa"],
+  ["New York", "Munich", "May", "Lufthansa"]
 ];
 
 // Month colors
@@ -668,25 +697,64 @@ const FlightGlobe = () => {
       endDot.position.copy(endPos);
       globeGroup.add(endDot);
       
-      // Calculate the midpoint and distance
-      const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
+      // Calculate the distance between points
       const distance = startPos.distanceTo(endPos);
       
-      // Normalize the midpoint and raise it above the surface
-      const midPointElevated = midPoint.clone().normalize().multiplyScalar(1 + distance * 0.4);
+      // Create a curve that follows the great circle path
+      const points = [];
+      const segments = 100;
       
-      // Create a curve
-      const curve = new THREE.QuadraticBezierCurve3(
-        startPos,
-        midPointElevated,
-        endPos
-      );
+      // Calculate the angle between start and end points
+      const angle = startPos.angleTo(endPos);
+      
+      // Create points along the great circle path
+      for (let i = 0; i <= segments; i++) {
+        // Interpolation factor
+        const t = i / segments;
+        
+        // Spherical interpolation (SLERP) between start and end vectors
+        // This ensures the path follows the curvature of the Earth
+        const quat = new THREE.Quaternion();
+        quat.setFromUnitVectors(startPos.clone().normalize(), endPos.clone().normalize());
+        quat.slerp(new THREE.Quaternion(), 1 - t);
+        
+        const point = startPos.clone().normalize();
+        point.applyQuaternion(quat);
+        
+        // Calculate base elevation that scales with distance and angle
+        // This ensures longer routes have higher elevation to avoid Earth intersection
+        const baseElevation = Math.min(0.3, distance * 0.3 + angle * 0.1);
+        
+        // Calculate elevation factor using a modified sine curve
+        let elevationFactor;
+        
+        if (i === 0 || i === segments) {
+          // Exact endpoints are directly on the surface
+          elevationFactor = 0;
+        } else if (t < 0.1 || t > 0.9) {
+          // Gradual takeoff/landing in the first/last 10% of the path
+          const endpointT = t < 0.1 ? t / 0.1 : (1 - t) / 0.1;
+          elevationFactor = Math.pow(endpointT, 1.5) * Math.sin(Math.PI * t);
+        } else {
+          // Normal elevation for the middle section
+          elevationFactor = Math.sin(Math.PI * t);
+        }
+        
+        // Apply the elevation
+        const elevationAmount = baseElevation * elevationFactor;
+        point.multiplyScalar(1 + elevationAmount);
+        
+        points.push(point);
+      }
+      
+      // Create a smooth curve from the points
+      const curve = new THREE.CatmullRomCurve3(points);
       
       // Create tube geometry for the flight path
       const tubeGeometry = new THREE.TubeGeometry(
         curve,
-        100, // segments
-        lineWidth * 0.008, // radius (increased from 0.005)
+        segments, // segments
+        lineWidth * 0.008, // radius
         8, // radius segments
         false // closed
       );
@@ -855,9 +923,9 @@ const FlightGlobe = () => {
         </div>
 
         {/* Modern Glassmorphic Controls Panel */}
-        <div className="absolute top-1/2 -translate-y-1/2 right-48 w-64 bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-lg border border-white/20">
+        <div className="absolute top-1/2 -translate-y-1/2 right- w-64 bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-lg border border-white/20">
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold mb-2 text-white">2022-2024 Flights</h2>
+            <h2 className="text-2xl font-bold mb-2 text-white">2021-2025 Flights</h2>
             <div>
               <label className="block text-white/90 text-sm font-medium mb-2">Month</label>
               <select 
