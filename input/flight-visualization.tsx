@@ -6,7 +6,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 // Airport coordinates (latitude, longitude)
-const airports = {
+const airports: Record<string, number[]> = {
   "Muscat": [23.5859, 58.4059],
   "Doha": [25.2854, 51.5310],
   "Frankfurt": [50.0379, 8.5622],
@@ -297,7 +297,7 @@ const monthColors = {
 };
 
 // Airline colors for dots - using a consistent warm color palette
-const airlineColors = {
+const airlineColors: Record<string, number> = {
   "Qatar": 0xFF6B6B,      // Coral Red
   "Lufthansa": 0xFFA07A,  // Light Salmon
   "FlyDubai": 0xFFB347,   // Pastel Orange
@@ -328,14 +328,20 @@ const airlineColors = {
 };
 
 const FlightGlobe = () => {
-  const mountRef = useRef(null);
+  const mountRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [flightCount, setFlightCount] = useState(0);
   const [monthFilter, setMonthFilter] = useState('All');
   const [airlineFilter, setAirlineFilter] = useState('All');
+  const [animateFlightPaths, setAnimateFlightPaths] = useState(false);
+  const [animationSpeed, setAnimationSpeed] = useState(50); // milliseconds per flight path
+  const [animationInProgress, setAnimationInProgress] = useState(false);
+  const [animationComplete, setAnimationComplete] = useState(false);
   
   useEffect(() => {
     // Initialize Three.js scene
+    if (!mountRef.current) return;
+    
     const width = mountRef.current.clientWidth;
     const height = mountRef.current.clientHeight;
     
@@ -410,8 +416,8 @@ const FlightGlobe = () => {
     const textureLoader = new THREE.TextureLoader();
     
     // Add error handling for texture loading
-    const loadTextureWithErrorHandling = (path) => {
-      return new Promise((resolve, reject) => {
+    const loadTextureWithErrorHandling = (path: string) => {
+      return new Promise<THREE.Texture>((resolve, reject) => {
         textureLoader.load(
           path,
           (texture) => {
@@ -426,8 +432,10 @@ const FlightGlobe = () => {
             canvas.width = 2;
             canvas.height = 2;
             const context = canvas.getContext('2d');
-            context.fillStyle = 'rgba(255,255,255,1)';
-            context.fillRect(0, 0, 2, 2);
+            if (context) {
+              context.fillStyle = 'rgba(255,255,255,1)';
+              context.fillRect(0, 0, 2, 2);
+            }
             const fallbackTexture = new THREE.CanvasTexture(canvas);
             resolve(fallbackTexture);
           }
@@ -662,7 +670,7 @@ const FlightGlobe = () => {
     controls.enablePan = false;
     
     // Convert lat/lng to 3D coordinates
-    const latLngToVector3 = (lat, lng, radius = 1) => {
+    const latLngToVector3 = (lat: number, lng: number, radius = 1) => {
       const phi = (90 - lat) * (Math.PI / 180);
       const theta = (lng + 180) * (Math.PI / 180);
       
@@ -674,7 +682,7 @@ const FlightGlobe = () => {
     };
     
     // Function to draw flight path
-    const drawFlightPath = (from, to, month, airline, lineWidth = 1) => {
+    const drawFlightPath = (from: string, to: string, month: string, airline: string, lineWidth = 1) => {
       if (!airports[from] || !airports[to]) return;
       
       // Generate vectors for start and end points
@@ -779,7 +787,7 @@ const FlightGlobe = () => {
     };
     
     // Array to store all flight path objects
-    const flightPaths = [];
+    const flightPaths: Array<{line: THREE.Mesh, startDot: THREE.Mesh, endDot: THREE.Mesh}> = [];
     
     // Count route frequencies
     const routeFrequencies = new Map();
@@ -791,6 +799,44 @@ const FlightGlobe = () => {
     // Find max frequency for normalization
     const maxFrequency = Math.max(...Array.from(routeFrequencies.values()));
     
+    // Function to animate flight paths in sequence
+    const animateFlightPathsSequentially = () => {
+      setAnimationInProgress(true);
+      setAnimationComplete(false);
+      
+      // Hide all flight paths initially
+      flightPaths.forEach(({ line, startDot, endDot }) => {
+        line.visible = false;
+        startDot.visible = false;
+        endDot.visible = false;
+      });
+      
+      // Show flight paths one by one with delay
+      flightPaths.forEach(({ line, startDot, endDot }, index) => {
+        setTimeout(() => {
+          // Check if the flight should be visible based on current filters
+          const monthMatch = monthFilter === 'All' || line.userData.month === monthFilter;
+          const airlineMatch = airlineFilter === 'All' || line.userData.airline === airlineFilter;
+          const visible = monthMatch && airlineMatch;
+          
+          if (visible) {
+            line.visible = true;
+            startDot.visible = true;
+            endDot.visible = true;
+            
+            // Increment counter for UI
+            setFlightCount(prev => prev + 1);
+          }
+          
+          // Check if animation is complete
+          if (index === flightPaths.length - 1) {
+            setAnimationInProgress(false);
+            setAnimationComplete(true);
+          }
+        }, index * animationSpeed);
+      });
+    };
+    
     // Add all flight paths
     flights.forEach(([from, to, month, airline], index) => {
       const routeKey = `${from}-${to}`;
@@ -800,17 +846,45 @@ const FlightGlobe = () => {
       
       const objects = drawFlightPath(from, to, month, airline, lineWidth);
       if (objects) {
+        // If animation is enabled, initially hide the flight path
+        if (animateFlightPaths) {
+          objects.line.visible = false;
+          objects.startDot.visible = false;
+          objects.endDot.visible = false;
+        }
+        
         flightPaths.push(objects);
         
-        // Increment counter with delay for animation effect
-        setTimeout(() => {
-          setFlightCount(prev => prev + 1);
-        }, index * 50);
+        // Only increment counter immediately if not animating
+        if (!animateFlightPaths) {
+          setTimeout(() => {
+            setFlightCount(prev => prev + 1);
+          }, index * 50);
+        }
       }
     });
     
+    // Start animation if enabled
+    if (animateFlightPaths && !animationInProgress && !animationComplete) {
+      animateFlightPathsSequentially();
+    }
+    
     // Apply filters
     const applyFilters = () => {
+      // If animation is in progress, don't change visibility
+      if (animationInProgress) return;
+      
+      // If animation is enabled but not started yet, hide all paths
+      if (animateFlightPaths && !animationComplete) {
+        flightPaths.forEach(({ line, startDot, endDot }) => {
+          line.visible = false;
+          startDot.visible = false;
+          endDot.visible = false;
+        });
+        return;
+      }
+      
+      // Normal filter application
       flightPaths.forEach(({ line, startDot, endDot }) => {
         const monthMatch = monthFilter === 'All' || line.userData.month === monthFilter;
         const airlineMatch = airlineFilter === 'All' || line.userData.airline === airlineFilter;
@@ -845,8 +919,9 @@ const FlightGlobe = () => {
     scene.environment = envMap;
     
     // Animation loop
+    let animationId: number;
     const animate = () => {
-      requestAnimationFrame(animate);
+      animationId = requestAnimationFrame(animate);
       
       // Rotate the globe group slightly for animation
       globeGroup.rotation.y += 0.001;
@@ -863,9 +938,10 @@ const FlightGlobe = () => {
         if (child.userData && child.userData.airline) {
           const phase = child.userData.pulsatePhase || 0;
           const pulseValue = 0.7 + 0.3 * Math.sin(time * 2 + phase);
-          if (child.material) {
-            child.material.emissiveIntensity = 0.8 * pulseValue;
-            child.material.opacity = 0.7 + 0.3 * pulseValue;
+          const mesh = child as THREE.Mesh;
+          if (mesh.material && mesh.material instanceof THREE.Material) {
+            (mesh.material as any).emissiveIntensity = 0.8 * pulseValue;
+            (mesh.material as any).opacity = 0.7 + 0.3 * pulseValue;
           }
         }
       });
@@ -885,19 +961,20 @@ const FlightGlobe = () => {
     
     // Clean up on unmount
     return () => {
+      cancelAnimationFrame(animationId);
       window.removeEventListener('resize', handleResize);
-      if (mountRef.current) {
+      if (mountRef.current && mountRef.current.contains(renderer.domElement)) {
         mountRef.current.removeChild(renderer.domElement);
       }
       // Dispose geometries and materials
       earthGeometry.dispose();
-      earthMaterial.dispose();
+      cloudGeometry.dispose();
       atmosphereGeometry.dispose();
+      earthMaterial.dispose();
+      cloudMaterial.dispose();
       atmosphereMaterial.dispose();
-      if (oceanLayer) oceanMaterial.dispose();
-      renderer.dispose();
     };
-  }, [monthFilter, airlineFilter]);
+  }, [monthFilter, airlineFilter, animateFlightPaths, animationSpeed, animationInProgress, animationComplete]);
   
   // Extract unique months and airlines for filters
   const months = ['All', ...new Set(flights.map(flight => flight[2]))].sort((a, b) => {
@@ -950,6 +1027,71 @@ const FlightGlobe = () => {
                   <option key={airline} value={airline} className="bg-gray-800 text-white">{airline}</option>
                 ))}
               </select>
+            </div>
+
+            {/* Animation Controls */}
+            <div className="pt-4 border-t border-white/10">
+              <h3 className="text-white/90 text-sm font-medium mb-3">Animation</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-white/90 text-sm">Animate Flight Paths</label>
+                  <button
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      animationInProgress 
+                        ? 'bg-red-500/80 text-white cursor-not-allowed'
+                        : animateFlightPaths 
+                          ? 'bg-green-500/80 text-white' 
+                          : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                    onClick={() => {
+                      if (!animationInProgress) {
+                        setAnimateFlightPaths(!animateFlightPaths);
+                        if (!animateFlightPaths) {
+                          setAnimationComplete(false);
+                        }
+                      }
+                    }}
+                    disabled={animationInProgress}
+                  >
+                    {animationInProgress ? 'Animating...' : animateFlightPaths ? 'Enabled' : 'Disabled'}
+                  </button>
+                </div>
+                
+                <div>
+                  <label className="block text-white/90 text-sm mb-1">Animation Speed</label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="range"
+                      min="10"
+                      max="200"
+                      step="10"
+                      value={animationSpeed}
+                      onChange={(e) => setAnimationSpeed(parseInt(e.target.value))}
+                      className="w-full accent-blue-500"
+                      disabled={animationInProgress}
+                    />
+                    <span className="text-white/80 text-xs w-10">{animationSpeed}ms</span>
+                  </div>
+                </div>
+                
+                <button
+                  className={`w-full py-2 rounded-lg text-sm font-medium transition-colors ${
+                    animationInProgress 
+                      ? 'bg-gray-500/50 text-white/50 cursor-not-allowed' 
+                      : 'bg-blue-500/80 text-white hover:bg-blue-600/80'
+                  }`}
+                  onClick={() => {
+                    if (!animationInProgress) {
+                      setFlightCount(0);
+                      setAnimationComplete(false);
+                      setAnimateFlightPaths(true);
+                    }
+                  }}
+                  disabled={animationInProgress}
+                >
+                  {animationComplete ? 'Replay Animation' : 'Start Animation'}
+                </button>
+              </div>
             </div>
 
             {/* Legend */}
