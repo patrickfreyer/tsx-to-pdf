@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -337,6 +337,63 @@ const FlightGlobe = () => {
   const [animationSpeed, setAnimationSpeed] = useState(50); // milliseconds per flight path
   const [animationInProgress, setAnimationInProgress] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
+  
+  // Ref to store flight paths for animation outside the main useEffect
+  const flightPathsRef = useRef<Array<{line: THREE.Mesh, startDot: THREE.Mesh, endDot: THREE.Mesh}>>([]);
+  
+  // Function to animate flight paths sequentially
+  const animateFlightPathsSequentially = useCallback(() => {
+    setAnimationInProgress(true);
+    setAnimationComplete(false);
+    setFlightCount(0);
+    
+    // Get flight paths from ref
+    const flightPaths = flightPathsRef.current;
+    
+    // Hide all flight paths initially
+    flightPaths.forEach(({ line, startDot, endDot }) => {
+      line.visible = false;
+      startDot.visible = false;
+      endDot.visible = false;
+    });
+    
+    // Show flight paths one by one with delay
+    flightPaths.forEach(({ line, startDot, endDot }, index) => {
+      setTimeout(() => {
+        // Check if the flight should be visible based on current filters
+        const monthMatch = monthFilter === 'All' || line.userData.month === monthFilter;
+        const airlineMatch = airlineFilter === 'All' || line.userData.airline === airlineFilter;
+        const visible = monthMatch && airlineMatch;
+        
+        if (visible) {
+          line.visible = true;
+          startDot.visible = true;
+          endDot.visible = true;
+          
+          // Increment counter for UI
+          setFlightCount(prev => prev + 1);
+        }
+        
+        // Check if animation is complete
+        if (index === flightPaths.length - 1) {
+          setAnimationInProgress(false);
+          setAnimationComplete(true);
+        }
+      }, index * animationSpeed);
+    });
+  }, [monthFilter, airlineFilter, animationSpeed]);
+  
+  // Effect to handle animation state changes
+  useEffect(() => {
+    if (animateFlightPaths && !animationInProgress && !animationComplete) {
+      // Small delay to ensure state updates have propagated
+      const timeoutId = setTimeout(() => {
+        animateFlightPathsSequentially();
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [animateFlightPaths, animationInProgress, animationComplete, animateFlightPathsSequentially]);
   
   useEffect(() => {
     // Initialize Three.js scene
@@ -799,44 +856,6 @@ const FlightGlobe = () => {
     // Find max frequency for normalization
     const maxFrequency = Math.max(...Array.from(routeFrequencies.values()));
     
-    // Function to animate flight paths in sequence
-    const animateFlightPathsSequentially = () => {
-      setAnimationInProgress(true);
-      setAnimationComplete(false);
-      
-      // Hide all flight paths initially
-      flightPaths.forEach(({ line, startDot, endDot }) => {
-        line.visible = false;
-        startDot.visible = false;
-        endDot.visible = false;
-      });
-      
-      // Show flight paths one by one with delay
-      flightPaths.forEach(({ line, startDot, endDot }, index) => {
-        setTimeout(() => {
-          // Check if the flight should be visible based on current filters
-          const monthMatch = monthFilter === 'All' || line.userData.month === monthFilter;
-          const airlineMatch = airlineFilter === 'All' || line.userData.airline === airlineFilter;
-          const visible = monthMatch && airlineMatch;
-          
-          if (visible) {
-            line.visible = true;
-            startDot.visible = true;
-            endDot.visible = true;
-            
-            // Increment counter for UI
-            setFlightCount(prev => prev + 1);
-          }
-          
-          // Check if animation is complete
-          if (index === flightPaths.length - 1) {
-            setAnimationInProgress(false);
-            setAnimationComplete(true);
-          }
-        }, index * animationSpeed);
-      });
-    };
-    
     // Add all flight paths
     flights.forEach(([from, to, month, airline], index) => {
       const routeKey = `${from}-${to}`;
@@ -846,66 +865,12 @@ const FlightGlobe = () => {
       
       const objects = drawFlightPath(from, to, month, airline, lineWidth);
       if (objects) {
-        // If animation is enabled, initially hide the flight path
-        if (animateFlightPaths) {
-          objects.line.visible = false;
-          objects.startDot.visible = false;
-          objects.endDot.visible = false;
-        }
-        
         flightPaths.push(objects);
-        
-        // Only increment counter immediately if not animating
-        if (!animateFlightPaths) {
-          setTimeout(() => {
-            setFlightCount(prev => prev + 1);
-          }, index * 50);
-        }
       }
     });
     
-    // Start animation if enabled
-    if (animateFlightPaths && !animationInProgress && !animationComplete) {
-      animateFlightPathsSequentially();
-    }
-    
-    // Apply filters
-    const applyFilters = () => {
-      // If animation is in progress, don't change visibility
-      if (animationInProgress) return;
-      
-      // If animation is enabled but not started yet, hide all paths
-      if (animateFlightPaths && !animationComplete) {
-        flightPaths.forEach(({ line, startDot, endDot }) => {
-          line.visible = false;
-          startDot.visible = false;
-          endDot.visible = false;
-        });
-        return;
-      }
-      
-      // Normal filter application
-      flightPaths.forEach(({ line, startDot, endDot }) => {
-        const monthMatch = monthFilter === 'All' || line.userData.month === monthFilter;
-        const airlineMatch = airlineFilter === 'All' || line.userData.airline === airlineFilter;
-        
-        const visible = monthMatch && airlineMatch;
-        line.visible = visible;
-        startDot.visible = visible;
-        endDot.visible = visible;
-      });
-    };
-    
-    // Handle filter changes
-    const filters = { monthFilter, airlineFilter };
-    Object.defineProperty(filters, 'monthFilter', {
-      get: () => monthFilter,
-      set: (value) => setMonthFilter(value)
-    });
-    Object.defineProperty(filters, 'airlineFilter', {
-      get: () => airlineFilter,
-      set: (value) => setAirlineFilter(value)
-    });
+    // Store flight paths in ref
+    flightPathsRef.current = flightPaths;
     
     // HDR Environment (comment out or properly import these if you want to use them)
     // Instead of RGBELoader which requires external import, use a simple CubeTextureLoader
@@ -974,7 +939,36 @@ const FlightGlobe = () => {
       cloudMaterial.dispose();
       atmosphereMaterial.dispose();
     };
-  }, [monthFilter, airlineFilter, animateFlightPaths, animationSpeed, animationInProgress, animationComplete]);
+  }, []);
+  
+  // Effect to handle filter changes
+  useEffect(() => {
+    // Skip if no flight paths yet
+    if (flightPathsRef.current.length === 0) return;
+    
+    // If animation is in progress, don't change visibility
+    if (animationInProgress) return;
+    
+    // Apply filters
+    flightPathsRef.current.forEach(({ line, startDot, endDot }) => {
+      const monthMatch = monthFilter === 'All' || line.userData.month === monthFilter;
+      const airlineMatch = airlineFilter === 'All' || line.userData.airline === airlineFilter;
+      
+      const visible = monthMatch && airlineMatch;
+      line.visible = visible;
+      startDot.visible = visible;
+      endDot.visible = visible;
+    });
+    
+    // Update flight count
+    const visibleFlights = flightPathsRef.current.filter(({ line }) => {
+      const monthMatch = monthFilter === 'All' || line.userData.month === monthFilter;
+      const airlineMatch = airlineFilter === 'All' || line.userData.airline === airlineFilter;
+      return monthMatch && airlineMatch;
+    }).length;
+    
+    setFlightCount(visibleFlights);
+  }, [monthFilter, airlineFilter, animationInProgress]);
   
   // Extract unique months and airlines for filters
   const months = ['All', ...new Set(flights.map(flight => flight[2]))].sort((a, b) => {
@@ -1046,7 +1040,8 @@ const FlightGlobe = () => {
                     onClick={() => {
                       if (!animationInProgress) {
                         setAnimateFlightPaths(!animateFlightPaths);
-                        if (!animateFlightPaths) {
+                        if (animateFlightPaths) {
+                          // We're turning it off, reset animation state
                           setAnimationComplete(false);
                         }
                       }
@@ -1082,14 +1077,15 @@ const FlightGlobe = () => {
                   }`}
                   onClick={() => {
                     if (!animationInProgress) {
-                      setFlightCount(0);
+                      // Reset animation state
                       setAnimationComplete(false);
+                      // Trigger animation
                       setAnimateFlightPaths(true);
                     }
                   }}
                   disabled={animationInProgress}
                 >
-                  {animationComplete ? 'Replay Animation' : 'Start Animation'}
+                  {animationInProgress ? 'Animating...' : animationComplete ? 'Replay Animation' : 'Start Animation'}
                 </button>
               </div>
             </div>
