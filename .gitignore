@@ -3,6 +3,7 @@ output/
 output.pdf
 complex-output.pdf
 *.pdf
+public/assets/
 
 # Temporary files
 temp/
