@@ -30,7 +30,7 @@ yargs(hideBin(process.argv))
         .option('paper-size', {
           describe: 'Paper size',
           type: 'string',
-          choices: ['A4', 'Letter'],
+          choices: ['A4', 'Letter', 'Mobile', 'Square'],
           default: 'A4',
         })
         .option('orientation', {

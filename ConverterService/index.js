@@ -9,14 +9,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * Configuration options for the TSX to PDF conversion
+ * Configuration options for the conversion process
+ * 
  * @typedef {Object} ConversionOptions
- * @property {string} aspectRatio - Aspect ratio for the slides (e.g., '16:9')
- * @property {string} paperSize - PDF paper size (e.g., 'A4', 'Letter')
- * @property {string} orientation - PDF orientation ('portrait' or 'landscape')
- * @property {number} margin - Margin in pixels
- * @property {boolean} autoSize - Automatically adjust PDF size to fit content
- * @property {boolean} debugMode - If true, keeps temporary files for debugging
+ * @property {string} aspectRatio - Aspect ratio of the output (e.g., '16:9', '4:3')
+ * @property {string} paperSize - PDF paper size (e.g., 'A4', 'Letter', 'Mobile', 'Square')
+ * @property {string} orientation - Page orientation ('landscape' or 'portrait')
+ * @property {number} margin - Page margin in pixels
+ * @property {boolean} autoSize - Whether to automatically size the content
+ * @property {boolean} debugMode - Whether to enable debug mode
  */
 
 /**
@@ -161,11 +162,51 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
   
   let width, height;
   if (orientation === 'landscape') {
-    width = paperSize === 'A4' ? 1190 : 1050; // A4 or Letter in landscape
-    height = Math.round(width / aspectRatioValue);
+    // Define dimensions based on paper size
+    switch (paperSize) {
+      case 'Mobile':
+        // iPhone portrait dimensions (9:16 aspect ratio)
+        width = 750; // iPhone width in points
+        height = Math.round(width / aspectRatioValue);
+        break;
+      case 'Square':
+        // 1:1 square format
+        width = 1000; // Square size
+        height = Math.round(width / aspectRatioValue);
+        break;
+      case 'A4':
+        width = 1190;
+        height = Math.round(width / aspectRatioValue);
+        break;
+      case 'Letter':
+      default:
+        width = 1050;
+        height = Math.round(width / aspectRatioValue);
+        break;
+    }
   } else {
-    height = paperSize === 'A4' ? 1190 : 1050; // A4 or Letter in portrait
-    width = Math.round(height * aspectRatioValue);
+    // Portrait orientation
+    switch (paperSize) {
+      case 'Mobile':
+        // iPhone portrait dimensions (9:16 aspect ratio)
+        height = 1334; // iPhone height in points
+        width = Math.round(height * aspectRatioValue);
+        break;
+      case 'Square':
+        // 1:1 square format
+        height = 1000; // Square size
+        width = Math.round(height * aspectRatioValue);
+        break;
+      case 'A4':
+        height = 1190;
+        width = Math.round(height * aspectRatioValue);
+        break;
+      case 'Letter':
+      default:
+        height = 1050;
+        width = Math.round(height * aspectRatioValue);
+        break;
+    }
   }
   
   console.log(`Setting initial viewport to ${width}x${height} (${aspectRatio})`);

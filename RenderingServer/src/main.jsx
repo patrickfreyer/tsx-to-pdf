@@ -14,6 +14,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <li><a href="/ExampleSlide" className="text-blue-600 hover:underline">ExampleSlide</a></li>
         <li><a href="/AiDataFormatDecisionTree" className="text-blue-600 hover:underline">ai-data-format-decision-tree</a></li>
         <li><a href="/ButtonShowcase" className="text-blue-600 hover:underline">button-showcase</a></li>
+        <li><a href="/FlightLongevityCheatsheetV2" className="text-blue-600 hover:underline">flight-longevity-cheatsheet-v2</a></li>
         <li><a href="/FlightVisualization" className="text-blue-600 hover:underline">flight-visualization</a></li>
         <li><a href="/LlmComparisonVisualization" className="text-blue-600 hover:underline">llm-comparison-visualization</a></li>
         <li><a href="/ThinkingLlmVisualization" className="text-blue-600 hover:underline">thinking-llm-visualization</a></li>

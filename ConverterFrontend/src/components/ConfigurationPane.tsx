@@ -182,6 +182,8 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
               >
                 <option value="A4">A4</option>
                 <option value="Letter">Letter</option>
+                <option value="Mobile">Mobile (iPhone Portrait)</option>
+                <option value="Square">Square (1:1)</option>
               </select>
             </div>
             
