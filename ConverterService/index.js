@@ -210,12 +210,85 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
         // Generate PDF
         if (autoSize) {
           try {
-            // Try to get the dimensions of the content
+            // First, ensure we scroll through the entire page to load all content
+            await page.evaluate(async () => {
+              // Scroll to the bottom of the page to ensure all content is loaded
+              await new Promise((resolve) => {
+                let totalHeight = 0;
+                const distance = 100;
+                const timer = setInterval(() => {
+                  const scrollHeight = document.body.scrollHeight;
+                  window.scrollBy(0, distance);
+                  totalHeight += distance;
+                  
+                  if (totalHeight >= scrollHeight) {
+                    clearInterval(timer);
+                    window.scrollTo(0, 0); // Scroll back to top
+                    resolve();
+                  }
+                }, 100);
+              });
+            });
+            
+            // Wait a moment for any post-scroll rendering to complete
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Get the dimensions of the content with a more precise calculation
             const dimensions = await page.evaluate(() => {
+              // First approach: Get the root element's content
+              const rootElement = document.querySelector('#root > *');
+              
+              if (rootElement) {
+                // Get all elements in the document to find the true content boundaries
+                const allElements = Array.from(document.querySelectorAll('*'));
+                let maxBottom = 0;
+                let maxRight = 0;
+                let minTop = Infinity;
+                let minLeft = Infinity;
+                
+                // Check all elements to find the true boundaries of content
+                allElements.forEach(el => {
+                  // Only consider elements that are actually visible and rendered
+                  if (el.offsetParent !== null && 
+                      window.getComputedStyle(el).display !== 'none' && 
+                      window.getComputedStyle(el).visibility !== 'hidden') {
+                    const rect = el.getBoundingClientRect();
+                    
+                    // Only consider elements that have actual dimensions
+                    if (rect.width > 0 && rect.height > 0) {
+                      maxRight = Math.max(maxRight, rect.right + window.scrollX);
+                      maxBottom = Math.max(maxBottom, rect.bottom + window.scrollY);
+                      minLeft = Math.min(minLeft, rect.left + window.scrollX);
+                      minTop = Math.min(minTop, rect.top + window.scrollY);
+                    }
+                  }
+                });
+                
+                // If we found valid dimensions
+                if (maxRight > 0 && maxBottom > 0 && minLeft < Infinity && minTop < Infinity) {
+                  // Calculate width and height accounting for the actual content boundaries
+                  const width = maxRight - minLeft;
+                  const height = maxBottom - minTop;
+                  
+                  return {
+                    width: Math.ceil(width),
+                    height: Math.ceil(height),
+                    method: 'absoluteContentBounds',
+                    details: {
+                      minLeft, minTop, maxRight, maxBottom,
+                      viewportWidth: window.innerWidth,
+                      viewportHeight: window.innerHeight,
+                      scrollX: window.scrollX,
+                      scrollY: window.scrollY
+                    }
+                  };
+                }
+              }
+              
+              // Fallback to document dimensions if no valid content found
               const body = document.body;
               const html = document.documentElement;
               
-              // Get the maximum dimensions of the content
               const width = Math.max(
                 body.scrollWidth,
                 body.offsetWidth,
@@ -232,10 +305,17 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
                 html.offsetHeight
               );
               
-              return { width, height };
+              return { 
+                width, 
+                height,
+                method: 'documentDimensions'
+              };
             });
             
-            console.log(`Content dimensions: ${dimensions.width}x${dimensions.height}`);
+            console.log(`Content dimensions: ${dimensions.width}x${dimensions.height} (method: ${dimensions.method})`);
+            if (dimensions.details) {
+              console.log(`Content bounds details:`, dimensions.details);
+            }
             
             // Use the content dimensions for the PDF, but ensure minimum width is respected
             const pdfWidth = Math.max(dimensions.width, viewportWidth);
