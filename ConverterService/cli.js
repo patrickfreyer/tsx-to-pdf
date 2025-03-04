@@ -5,6 +5,9 @@ import { hideBin } from 'yargs/helpers';
 import convertTsxToPdf from './index.js';
 import path from 'path';
 
+// Debug: Log raw command line arguments
+console.log('Raw CLI arguments:', process.argv);
+
 // Parse command line arguments
 yargs(hideBin(process.argv))
   .command(
@@ -22,25 +25,23 @@ yargs(hideBin(process.argv))
           type: 'string',
           default: 'output.pdf',
         })
-        .option('aspect-ratio', {
-          describe: 'Aspect ratio (width:height)',
-          type: 'string',
-          default: '16:9',
+        .option('width', {
+          describe: 'Width of the output in pixels',
+          type: 'number',
+          default: 390,
+          coerce: (value) => {
+            const parsed = parseInt(value, 10);
+            return isNaN(parsed) ? 390 : parsed;
+          }
         })
-        .option('paper-size', {
-          describe: 'Paper size',
+        .option('width-preset', {
+          describe: 'Width preset',
           type: 'string',
-          choices: ['A4', 'Letter', 'Mobile', 'Square'],
-          default: 'A4',
-        })
-        .option('orientation', {
-          describe: 'Page orientation',
-          type: 'string',
-          choices: ['portrait', 'landscape'],
-          default: 'landscape',
+          choices: ['iPhone', 'A4', 'MacBook', 'custom'],
+          default: 'iPhone',
         })
         .option('margin', {
-          describe: 'Page margin in pixels',
+          describe: 'Margin in pixels',
           type: 'number',
           default: 0,
         })
@@ -58,6 +59,17 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       try {
+        // Debug: Log parsed arguments
+        console.log('Parsed CLI arguments:', {
+          files: argv.files,
+          output: argv.output,
+          width: argv.width,
+          widthPreset: argv['width-preset'],
+          margin: argv.margin,
+          autoSize: argv['auto-size'],
+          debug: argv.debug
+        });
+        
         // Check if localhost:5174 is accessible
         console.log('NOTE: This tool requires a development server running at http://localhost:5174');
         console.log('Make sure your server is running before continuing.');
@@ -69,9 +81,8 @@ yargs(hideBin(process.argv))
         }
         
         await convertTsxToPdf(argv.files, outputPath, {
-          aspectRatio: argv['aspect-ratio'],
-          paperSize: argv['paper-size'],
-          orientation: argv.orientation,
+          width: argv.width,
+          widthPreset: argv['width-preset'],
           margin: argv.margin,
           autoSize: argv['auto-size'],
           debugMode: argv.debug,

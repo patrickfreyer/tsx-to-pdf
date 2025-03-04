@@ -15,9 +15,8 @@ interface OutputFile {
 }
 
 interface ExportOptions {
-  aspectRatio: string;
-  paperSize: string;
-  orientation: string;
+  width: number;
+  widthPreset: string;
   margin: number;
   autoSize: boolean;
   debug: boolean;

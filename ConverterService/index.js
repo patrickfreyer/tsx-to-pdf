@@ -12,9 +12,8 @@ const __dirname = path.dirname(__filename);
  * Configuration options for the conversion process
  * 
  * @typedef {Object} ConversionOptions
- * @property {string} aspectRatio - Aspect ratio of the output (e.g., '16:9', '4:3')
- * @property {string} paperSize - PDF paper size (e.g., 'A4', 'Letter', 'Mobile', 'Square')
- * @property {string} orientation - Page orientation ('landscape' or 'portrait')
+ * @property {number} width - Width of the output in pixels
+ * @property {string} widthPreset - Preset name for width (e.g., 'iPhone', 'A4', 'MacBook')
  * @property {number} margin - Page margin in pixels
  * @property {boolean} autoSize - Whether to automatically size the content
  * @property {boolean} debugMode - Whether to enable debug mode
@@ -102,6 +101,12 @@ async function buildTsxFile(tsxPath, outputDir) {
  * @param {ConversionOptions} options - Configuration options
  */
 async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
+  // Debug: Log the raw options object
+  console.log('Raw options object:', options);
+  console.log('Options type:', typeof options);
+  console.log('Width type:', typeof options.width);
+  console.log('Width value:', options.width);
+  
   // Ensure tsxPaths is an array
   const tsxPathsArray = Array.isArray(tsxPaths) ? tsxPaths : [tsxPaths];
   
@@ -111,10 +116,12 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
     finalOutputPath = path.join('output', finalOutputPath);
   }
   
+  // Parse options and ensure width is a number
+  const widthValue = options.width !== undefined ? parseInt(options.width, 10) : 390;
+  
   const {
-    aspectRatio = '16:9',
-    paperSize = 'A4',
-    orientation = 'landscape',
+    width = widthValue, // Use parsed width or default to iPhone width
+    widthPreset = 'iPhone',
     margin = 0,
     autoSize = true,
     debugMode = false
@@ -123,7 +130,8 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
   console.log(`Starting conversion of ${tsxPathsArray.length} TSX files to PDF...`);
   console.log(`TSX files: ${tsxPathsArray.join(', ')}`);
   console.log(`Output path: ${finalOutputPath}`);
-  console.log(`Options: ${JSON.stringify(options, null, 2)}`);
+  console.log(`Options received: ${JSON.stringify(options, null, 2)}`);
+  console.log(`Parsed width: ${widthValue}, Final width: ${width}, Width preset: ${widthPreset}`);
   
   // Set debug mode environment variable
   if (debugMode) {
@@ -156,62 +164,20 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
   const page = await browser.newPage();
   console.log('Browser launched');
 
-  // Calculate dimensions based on aspect ratio and paper size
-  const aspectRatioValues = aspectRatio.split(':').map(Number);
-  const aspectRatioValue = aspectRatioValues[0] / aspectRatioValues[1];
-  
-  let width, height;
-  if (orientation === 'landscape') {
-    // Define dimensions based on paper size
-    switch (paperSize) {
-      case 'Mobile':
-        // iPhone portrait dimensions (9:16 aspect ratio)
-        width = 750; // iPhone width in points
-        height = Math.round(width / aspectRatioValue);
-        break;
-      case 'Square':
-        // 1:1 square format
-        width = 1000; // Square size
-        height = Math.round(width / aspectRatioValue);
-        break;
-      case 'A4':
-        width = 1190;
-        height = Math.round(width / aspectRatioValue);
-        break;
-      case 'Letter':
-      default:
-        width = 1050;
-        height = Math.round(width / aspectRatioValue);
-        break;
-    }
-  } else {
-    // Portrait orientation
-    switch (paperSize) {
-      case 'Mobile':
-        // iPhone portrait dimensions (9:16 aspect ratio)
-        height = 1334; // iPhone height in points
-        width = Math.round(height * aspectRatioValue);
-        break;
-      case 'Square':
-        // 1:1 square format
-        height = 1000; // Square size
-        width = Math.round(height * aspectRatioValue);
-        break;
-      case 'A4':
-        height = 1190;
-        width = Math.round(height * aspectRatioValue);
-        break;
-      case 'Letter':
-      default:
-        height = 1050;
-        width = Math.round(height * aspectRatioValue);
-        break;
-    }
+  // Calculate dimensions based on width
+  // We'll use a dynamic height that fits the content
+  let viewportWidth = parseInt(width, 10); // Ensure width is a number
+  if (isNaN(viewportWidth) || viewportWidth <= 0) {
+    console.warn(`Invalid width value: ${width}, using default of 390`);
+    viewportWidth = 390; // Default to iPhone width if invalid
   }
   
-  console.log(`Setting initial viewport to ${width}x${height} (${aspectRatio})`);
-  // Set viewport to match desired aspect ratio
-  await page.setViewport({ width, height });
+  let viewportHeight = Math.round(viewportWidth * 1.5); // Default height ratio of 1.5x width
+  
+  console.log(`Setting initial viewport to ${viewportWidth}x${viewportHeight}`);
+  
+  // Set viewport to match desired width
+  await page.setViewport({ width: viewportWidth, height: viewportHeight });
 
   const tempPdfPaths = [];
 
@@ -241,66 +207,85 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
         // Optional: Wait a bit more to ensure all animations and resources are loaded
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Get the actual dimensions of the content
-        const dimensions = await page.evaluate(() => {
-          const rootElement = document.querySelector('#root > *');
-          if (!rootElement) return null;
-          
-          // Get the bounding box of the content
-          const rect = rootElement.getBoundingClientRect();
-          
-          return {
-            width: Math.ceil(rect.width),
-            height: Math.ceil(rect.height)
-          };
-        });
-        
-        // Adjust viewport and PDF dimensions based on content
-        if (autoSize && dimensions && dimensions.width > 0 && dimensions.height > 0) {
-          // Add some padding
-          const pdfWidth = dimensions.width + (margin * 2);
-          const pdfHeight = dimensions.height + (margin * 2);
-          
-          console.log(`Auto-adjusting PDF size to content: ${pdfWidth}x${pdfHeight}`);
-          
-          // Update viewport to match content
-          await page.setViewport({ 
-            width: pdfWidth, 
-            height: pdfHeight 
-          });
-          
-          // Wait for the page to adjust
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          console.log(`Generating PDF with content-based dimensions: ${tempPdfPath}`);
-          await page.pdf({
-            path: tempPdfPath,
-            width: `${pdfWidth}px`,
-            height: `${pdfHeight}px`,
-            margin: {
-              top: `${margin}px`,
-              right: `${margin}px`,
-              bottom: `${margin}px`,
-              left: `${margin}px`
-            },
-            printBackground: true,
-            pageRanges: '1',
-          });
+        // Generate PDF
+        if (autoSize) {
+          try {
+            // Try to get the dimensions of the content
+            const dimensions = await page.evaluate(() => {
+              const body = document.body;
+              const html = document.documentElement;
+              
+              // Get the maximum dimensions of the content
+              const width = Math.max(
+                body.scrollWidth,
+                body.offsetWidth,
+                html.clientWidth,
+                html.scrollWidth,
+                html.offsetWidth
+              );
+              
+              const height = Math.max(
+                body.scrollHeight,
+                body.offsetHeight,
+                html.clientHeight,
+                html.scrollHeight,
+                html.offsetHeight
+              );
+              
+              return { width, height };
+            });
+            
+            console.log(`Content dimensions: ${dimensions.width}x${dimensions.height}`);
+            
+            // Use the content dimensions for the PDF, but ensure minimum width is respected
+            const pdfWidth = Math.max(dimensions.width, viewportWidth);
+            const pdfHeight = dimensions.height;
+            
+            console.log(`Using content-based dimensions for PDF: ${pdfWidth}x${pdfHeight}`);
+            
+            await page.pdf({
+              path: tempPdfPath,
+              width: `${pdfWidth}px`,
+              height: `${pdfHeight}px`,
+              margin: {
+                top: `${margin}px`,
+                right: `${margin}px`,
+                bottom: `${margin}px`,
+                left: `${margin}px`,
+              },
+              printBackground: true,
+            });
+          } catch (error) {
+            console.error('Error determining content dimensions:', error);
+            // Fallback to default dimensions if content dimensions couldn't be determined
+            console.log(`Using default dimensions for PDF: ${viewportWidth}x${viewportHeight}`);
+            await page.pdf({
+              path: tempPdfPath,
+              width: `${viewportWidth}px`,
+              height: `${viewportHeight}px`,
+              margin: {
+                top: `${margin}px`,
+                right: `${margin}px`,
+                bottom: `${margin}px`,
+                left: `${margin}px`,
+              },
+              printBackground: true,
+            });
+          }
         } else {
-          // Fallback to default dimensions if content dimensions couldn't be determined
-          console.log(`Using default dimensions for PDF: ${width}x${height}`);
+          // Use fixed dimensions based on viewport
+          console.log(`Using fixed dimensions for PDF: ${viewportWidth}x${viewportHeight}`);
           await page.pdf({
             path: tempPdfPath,
-            width: `${width}px`,
-            height: `${height}px`,
+            width: `${viewportWidth}px`,
+            height: `${viewportHeight}px`,
             margin: {
               top: `${margin}px`,
               right: `${margin}px`,
               bottom: `${margin}px`,
-              left: `${margin}px`
+              left: `${margin}px`,
             },
             printBackground: true,
-            pageRanges: '1',
           });
         }
         

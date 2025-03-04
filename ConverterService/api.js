@@ -104,8 +104,11 @@ export async function listOutputFiles() {
  */
 export async function exportComponent(componentFile, outputFile, options = {}) {
   return new Promise((resolve, reject) => {
-    // Build the command arguments
-    const args = ['run', 'convert', `input/${componentFile}`];
+    // Log the received options
+    console.log(`Export options received: ${JSON.stringify(options, null, 2)}`);
+    
+    // Build the command arguments - call node directly instead of using npm run
+    const args = ['ConverterService/cli.js', `input/${componentFile}`];
     
     // Add output file if provided
     if (outputFile) {
@@ -113,16 +116,21 @@ export async function exportComponent(componentFile, outputFile, options = {}) {
     }
     
     // Add options
-    if (options.aspectRatio) {
-      args.push(`--aspect-ratio=${options.aspectRatio}`);
+    if (options.width !== undefined) {
+      // Ensure width is a number
+      const numericWidth = parseInt(options.width, 10);
+      if (!isNaN(numericWidth)) {
+        args.push(`--width=${numericWidth}`);
+        console.log(`Using width: ${numericWidth}`);
+      } else {
+        console.warn(`Invalid width value: ${options.width}, not adding to command`);
+      }
+    } else {
+      console.log('No width specified in options');
     }
     
-    if (options.paperSize) {
-      args.push(`--paper-size=${options.paperSize}`);
-    }
-    
-    if (options.orientation) {
-      args.push(`--orientation=${options.orientation}`);
+    if (options.widthPreset) {
+      args.push(`--width-preset=${options.widthPreset}`);
     }
     
     if (options.margin !== undefined) {
@@ -138,11 +146,11 @@ export async function exportComponent(componentFile, outputFile, options = {}) {
     }
     
     // Build the full command for display purposes
-    const command = `npm ${args.join(' ')}`;
+    const command = `node ${args.join(' ')}`;
     console.log(`Executing command: ${command}`);
     
     // Execute the command
-    const process = spawn('npm', args, {
+    const process = spawn('node', args, {
       cwd: path.join(__dirname, '..'),
       stdio: ['ignore', 'pipe', 'pipe']
     });

@@ -13,9 +13,8 @@ interface OutputFile {
 }
 
 interface ExportOptions {
-  aspectRatio: string;
-  paperSize: string;
-  orientation: string;
+  width: number;
+  widthPreset: string;
   margin: number;
   autoSize: boolean;
   debug: boolean;
@@ -56,9 +55,8 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
   const [activeTab, setActiveTab] = useState<'export' | 'files'>('export');
   const [outputFileName, setOutputFileName] = useState<string>('output.pdf');
   const [options, setOptions] = useState<ExportOptions>({
-    aspectRatio: '16:9',
-    paperSize: 'A4',
-    orientation: 'landscape',
+    width: 390, // iPhone width
+    widthPreset: 'iPhone',
     margin: 0,
     autoSize: true,
     debug: false,
@@ -159,44 +157,57 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
           
           <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-300 font-semibold mb-2">Aspect Ratio</label>
-              <select
+              <label className="block text-gray-300 font-semibold mb-2">Width</label>
+              <input
+                type="number"
                 className="w-full p-2 bg-black/30 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-                value={options.aspectRatio}
-                onChange={(e) => setOptions({...options, aspectRatio: e.target.value})}
+                value={options.width}
+                onChange={(e) => {
+                  const numericValue = parseInt(e.target.value, 10);
+                  setOptions({
+                    ...options, 
+                    width: isNaN(numericValue) ? 0 : numericValue,
+                    widthPreset: 'custom' // Switch to custom preset when manually changing width
+                  });
+                }}
+                min="0"
                 disabled={isLoading}
-              >
-                <option value="16:9">16:9</option>
-                <option value="4:3">4:3</option>
-                <option value="1:1">1:1</option>
-              </select>
+              />
             </div>
             
             <div>
-              <label className="block text-gray-300 font-semibold mb-2">Paper Size</label>
+              <label className="block text-gray-300 font-semibold mb-2">Width Preset</label>
               <select
                 className="w-full p-2 bg-black/30 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-                value={options.paperSize}
-                onChange={(e) => setOptions({...options, paperSize: e.target.value})}
+                value={options.widthPreset}
+                onChange={(e) => {
+                  const preset = e.target.value;
+                  let width = options.width;
+                  
+                  // Set width based on preset
+                  switch(preset) {
+                    case 'iPhone':
+                      width = 390; // iPhone 12/13/14 width in points
+                      break;
+                    case 'A4':
+                      width = 794; // A4 width in points (72dpi)
+                      break;
+                    case 'MacBook':
+                      width = 1440; // MacBook Pro 14" width
+                      break;
+                    case 'custom':
+                      // Keep current width
+                      break;
+                  }
+                  
+                  setOptions({...options, widthPreset: preset, width});
+                }}
                 disabled={isLoading}
               >
+                <option value="iPhone">iPhone</option>
                 <option value="A4">A4</option>
-                <option value="Letter">Letter</option>
-                <option value="Mobile">Mobile (iPhone Portrait)</option>
-                <option value="Square">Square (1:1)</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-gray-300 font-semibold mb-2">Orientation</label>
-              <select
-                className="w-full p-2 bg-black/30 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-                value={options.orientation}
-                onChange={(e) => setOptions({...options, orientation: e.target.value})}
-                disabled={isLoading}
-              >
-                <option value="landscape">Landscape</option>
-                <option value="portrait">Portrait</option>
+                <option value="MacBook">MacBook</option>
+                <option value="custom">Custom</option>
               </select>
             </div>
             
