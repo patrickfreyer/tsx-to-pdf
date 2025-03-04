@@ -3,7 +3,7 @@ import { Moon, Sun, Droplet, Clock, Plane, Utensils, Dumbbell, Coffee, Zap, Eye,
 
 const FlightSurvivalCheatSheet = () => {
   return (
-    <div className="bg-gradient-to-br from-indigo-900 to-purple-900 text-white p-8 rounded-xl shadow-xl max-w-3xl mx-auto">
+    <div className="bg-gradient-to-br from-indigo-900 to-purple-900 text-white p-8 shadow-xl w-full">
       <div className="text-center mb-6">
         <div className="flex justify-center items-center mb-2">
           <Plane className="text-violet-300 mr-2 transform rotate-45" size={28} />
