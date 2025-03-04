@@ -23,7 +23,7 @@ const FlightSurvivalCheatSheet = () => {
               <div className="bg-violet-700/40 p-1 rounded-full mr-3 mt-1 flex-shrink-0">
                 <Utensils className="text-violet-200" size={16} />
               </div>
-              <p className="text-violet-100">Fast 3-4 hours before & during flight (skip lounge food & champagne - ik it's hard)<sup>7</sup></p>
+              <p className="text-violet-100">Fast before & during flight (yes, incl. the champagne)<sup>7</sup></p>
             </li>
             <li className="flex items-start">
               <div className="bg-violet-700/40 p-1 rounded-full mr-3 mt-1 flex-shrink-0">
@@ -35,7 +35,7 @@ const FlightSurvivalCheatSheet = () => {
               <div className="bg-violet-700/40 p-1 rounded-full mr-3 mt-1 flex-shrink-0">
                 <Map className="text-violet-200" size={16} />
               </div>
-              <p className="text-violet-100">Get some light movement and stretching in before the flight, if possible take a hot shower to lower your core body temp</p>
+              <p className="text-violet-100">If possible take a hot shower to lower core body temp</p>
             </li>
           </ul>
         </div>
@@ -63,7 +63,7 @@ const FlightSurvivalCheatSheet = () => {
               <div className="bg-violet-700/40 p-1 rounded-full mr-3 mt-1 flex-shrink-0">
                 <Wind className="text-violet-200" size={16} />
               </div>
-              <p className="text-violet-100">Skip onboard screens; opt for reading or synthorated.com podcasts<sup>11</sup></p>
+              <p className="text-violet-100">Skip onboard screens; opt for reading or synthorated.com<sup>11</sup></p>
             </li>
           </ul>
         </div>
@@ -100,7 +100,7 @@ const FlightSurvivalCheatSheet = () => {
         <div className="bg-indigo-800/40 p-5 rounded-lg backdrop-blur-sm border border-indigo-600/30 hover:bg-indigo-800/60 transition-colors">
           <div className="flex items-center mb-4 border-b border-pink-500/30 pb-2">
             <Zap className="text-pink-300 mr-2" size={22} />
-            <h3 className="text-lg font-bold text-pink-300">MY PERSONAL TRAVEL STACK<sup className="text-xs">†</sup></h3>
+            <h3 className="text-lg font-bold text-pink-300">MY TRAVEL SUPPLEMENTS<sup className="text-xs">†</sup></h3>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {[
@@ -112,8 +112,8 @@ const FlightSurvivalCheatSheet = () => {
               { name: 'Electrolytes', desc: 'Hydration', ref: '6' }
             ].map((supplement) => (
               <div key={supplement.name} className="bg-indigo-700/30 p-2 rounded-md text-center border border-indigo-500/20 hover:bg-indigo-700/50 transition-colors">
-                <p className="font-medium text-violet-200">{supplement.name}<sup className="text-xs">{supplement.ref}</sup></p>
-                <p className="text-xs text-violet-300 mt-1">{supplement.desc}</p>
+                <p className="font-medium text-violet-200 text-sm break-words">{supplement.name}<sup className="text-xs">{supplement.ref}</sup></p>
+                <p className="text-xs text-violet-300 mt-0.5 break-words">{supplement.desc}</p>
               </div>
             ))}
           </div>
