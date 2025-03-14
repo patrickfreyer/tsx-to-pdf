@@ -158,10 +158,18 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
 
   // Launch browser
   console.log('Launching Puppeteer browser...');
+  
+  // Get the Chrome executable path from Puppeteer
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || 
+                         '/home/runner/.cache/puppeteer/chrome/linux-133.0.6943.126/chrome-linux64/chrome';
+  
+  console.log(`Using Chrome executable path: ${executablePath}`);
+  
   const browser = await puppeteer.launch({
     headless: 'new', // Use new headless mode
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     ignoreDefaultArgs: ['--disable-extensions'],
+    executablePath: executablePath,
   });
   const page = await browser.newPage();
   console.log('Browser launched');
