@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import puppeteer from 'puppeteer';
 import { PDFDocument } from 'pdf-lib';
 import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -94,6 +95,128 @@ async function buildTsxFile(tsxPath, outputDir) {
 }
 
 /**
+ * Find the Chrome executable path across different environments
+ * @returns {string|null} The path to Chrome executable or null if not found
+ */
+async function findChromePath() {
+  console.log('Attempting to find Chrome executable path...');
+  
+  // Check environment variable first (highest priority)
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    console.log(`Using Chrome path from PUPPETEER_EXECUTABLE_PATH: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  
+  // Check if running in Replit
+  const isReplit = process.env.REPL_SLUG && process.env.REPL_OWNER;
+  if (isReplit) {
+    console.log('Detected Replit environment, checking Replit-specific paths');
+    
+    // Common Chrome paths in Replit
+    const replitPaths = [
+      '/nix/store/x205pbkd5xh5g4iv0n41nvpy7wp1wr8w-chromium-108.0.5359.94/bin/chromium',
+      '/nix/store/hy65mn4w9whf10f2w1q08v727h0rryjw-chromium-112.0.5615.49/bin/chromium',
+      '/home/runner/.cache/puppeteer/chrome/linux-*/chrome-linux*/chrome',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium'
+    ];
+    
+    // Try to find Chrome in Replit paths
+    for (const chromePath of replitPaths) {
+      if (chromePath.includes('*')) {
+        // Handle wildcard paths
+        try {
+          // Get the parent directory
+          const parentDir = path.dirname(chromePath.split('*')[0]);
+          if (existsSync(parentDir)) {
+            // List all subdirectories
+            const dirs = await fs.readdir(parentDir);
+            for (const dir of dirs) {
+              const fullPath = chromePath.replace('*', dir).replace('*', '');
+              if (existsSync(fullPath)) {
+                console.log(`Found Chrome in Replit at: ${fullPath}`);
+                return fullPath;
+              }
+            }
+          }
+        } catch (err) {
+          console.log(`Error checking wildcard path ${chromePath}: ${err.message}`);
+        }
+      } else if (existsSync(chromePath)) {
+        console.log(`Found Chrome in Replit at: ${chromePath}`);
+        return chromePath;
+      }
+    }
+    
+    // Try to find using which command
+    try {
+      const chromiumPath = execSync('which chromium-browser || which chromium || which google-chrome').toString().trim();
+      if (chromiumPath) {
+        console.log(`Found Chrome using 'which' command: ${chromiumPath}`);
+        return chromiumPath;
+      }
+    } catch (err) {
+      console.log('Chrome not found using which command');
+    }
+  }
+  
+  // Check common paths based on OS
+  const platform = process.platform;
+  let paths = [];
+  
+  if (platform === 'darwin') {
+    // macOS paths
+    paths = [
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+      '/Applications/Chromium.app/Contents/MacOS/Chromium'
+    ];
+  } else if (platform === 'win32') {
+    // Windows paths
+    const programFiles = process.env.PROGRAMFILES || 'C:\\Program Files';
+    const programFilesX86 = process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)';
+    
+    paths = [
+      `${programFiles}\\Google\\Chrome\\Application\\chrome.exe`,
+      `${programFilesX86}\\Google\\Chrome\\Application\\chrome.exe`,
+      `${process.env.LOCALAPPDATA}\\Google\\Chrome\\Application\\chrome.exe`
+    ];
+  } else {
+    // Linux paths
+    paths = [
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      '/snap/bin/chromium'
+    ];
+  }
+  
+  // Check if any of the paths exist
+  for (const chromePath of paths) {
+    if (existsSync(chromePath)) {
+      console.log(`Found Chrome at: ${chromePath}`);
+      return chromePath;
+    }
+  }
+  
+  // If we get here, try to use Puppeteer's bundled Chrome as a fallback
+  try {
+    const browserFetcher = puppeteer.createBrowserFetcher();
+    const revisionInfo = await browserFetcher.download(puppeteer.executablePath());
+    if (revisionInfo && revisionInfo.executablePath) {
+      console.log(`Using Puppeteer's bundled Chrome: ${revisionInfo.executablePath}`);
+      return revisionInfo.executablePath;
+    }
+  } catch (err) {
+    console.log(`Error getting Puppeteer's bundled Chrome: ${err.message}`);
+  }
+  
+  // Last resort: let Puppeteer try to find Chrome itself
+  console.log('Could not find Chrome executable, will let Puppeteer try to find it');
+  return null;
+}
+
+/**
  * Converts TSX files to a single PDF document
  * 
  * @param {string[]} tsxPaths - Array of paths to TSX files
@@ -159,18 +282,33 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
   // Launch browser
   console.log('Launching Puppeteer browser...');
   
-  // Get the Chrome executable path from Puppeteer
-  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || 
-                         '/home/runner/.cache/puppeteer/chrome/linux-133.0.6943.126/chrome-linux64/chrome';
+  // Find Chrome executable path
+  const executablePath = await findChromePath();
   
-  console.log(`Using Chrome executable path: ${executablePath}`);
-  
-  const browser = await puppeteer.launch({
+  // Configure browser launch options
+  const launchOptions = {
     headless: 'new', // Use new headless mode
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ],
     ignoreDefaultArgs: ['--disable-extensions'],
-    executablePath: executablePath,
-  });
+  };
+  
+  // Add executable path if found
+  if (executablePath) {
+    launchOptions.executablePath = executablePath;
+  }
+  
+  console.log(`Browser launch options: ${JSON.stringify(launchOptions, null, 2)}`);
+  
+  const browser = await puppeteer.launch(launchOptions);
   const page = await browser.newPage();
   console.log('Browser launched');
 
