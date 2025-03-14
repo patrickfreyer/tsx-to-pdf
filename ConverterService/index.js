@@ -160,6 +160,8 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
   console.log('Launching Puppeteer browser...');
   const browser = await puppeteer.launch({
     headless: 'new', // Use new headless mode
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    ignoreDefaultArgs: ['--disable-extensions'],
   });
   const page = await browser.newPage();
   console.log('Browser launched');

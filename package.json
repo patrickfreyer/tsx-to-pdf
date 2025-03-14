@@ -14,7 +14,9 @@
     "start-server": "node ConverterService/server.js",
     "start-ui": "npm run build-frontend && npm run start-server",
     "start-dev-server": "cd RenderingServer && npm run dev",
-    "dev": "node watch-and-build.js"
+    "dev": "node watch-and-build.js",
+    "postinstall": "npx puppeteer browsers install chrome",
+    "check-puppeteer": "node check-puppeteer.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
