@@ -22,7 +22,7 @@ async function findChromePath() {
   // Check if running in Replit
   const isReplit = process.env.REPL_SLUG && process.env.REPL_OWNER;
   if (isReplit) {
-    console.log('Detected Replit environment, checking Replit-specific paths');
+    console.log('Detected Replit environment, using known Replit Chrome path');
     
     // DIRECT PATH: Use the exact path we know Chrome is installed at from the error message
     const exactChromePath = '/home/runner/.cache/puppeteer/chrome/linux-133.0.6943.126/chrome-linux64/chrome';
@@ -46,85 +46,42 @@ async function findChromePath() {
       return exactChromePath;
     }
     
-    // Common Chrome paths in Replit
+    // Try a few common Replit paths without extensive searching
     const replitPaths = [
-      '/home/runner/.cache/puppeteer/chrome/linux-*/chrome-linux*/chrome',
       '/nix/store/*/chromium-*/bin/chromium',
       '/usr/bin/chromium-browser',
       '/usr/bin/chromium',
       '/usr/bin/google-chrome'
     ];
     
-    // Try to find Chrome in Replit paths
+    // Try the most common Replit Chrome paths directly
     for (const chromePath of replitPaths) {
-      if (chromePath.includes('*')) {
-        // Handle wildcard paths
-        try {
-          // Get the parent directory
-          const parentDir = path.dirname(chromePath.split('*')[0]);
-          if (existsSync(parentDir)) {
-            // Use find command for more reliable wildcard path resolution
-            const findCmd = `find ${parentDir} -path "${chromePath}" -type f 2>/dev/null`;
-            console.log(`Executing find command: ${findCmd}`);
-            
-            try {
-              const foundPaths = execSync(findCmd).toString().trim().split('\n');
-              if (foundPaths.length > 0 && foundPaths[0]) {
-                const foundPath = foundPaths[0];
-                console.log(`Found Chrome using find command: ${foundPath}`);
-                
-                // Check if executable and try to make it executable if not
-                try {
-                  execSync(`test -x "${foundPath}"`);
-                } catch (err) {
-                  console.log(`Chrome exists but is not executable, attempting to make it executable: ${foundPath}`);
-                  try {
-                    execSync(`chmod +x "${foundPath}"`);
-                    console.log('Successfully made Chrome executable');
-                  } catch (chmodErr) {
-                    console.log(`Failed to make Chrome executable: ${chmodErr.message}`);
-                  }
-                }
-                
-                return foundPath;
-              }
-            } catch (findErr) {
-              console.log(`Error executing find command: ${findErr.message}`);
-            }
-            
-            // Fallback to directory listing if find command fails
-            try {
-              const dirs = await fs.readdir(parentDir);
-              for (const dir of dirs) {
-                const fullPath = chromePath.replace('*', dir).replace('*', '');
-                if (existsSync(fullPath)) {
-                  console.log(`Found Chrome in Replit at: ${fullPath}`);
-                  return fullPath;
-                }
-              }
-            } catch (err) {
-              console.log(`Error checking wildcard path ${chromePath}: ${err.message}`);
-            }
-          }
-        } catch (err) {
-          console.log(`Error checking wildcard path ${chromePath}: ${err.message}`);
+      if (!chromePath.includes('*')) {
+        if (existsSync(chromePath)) {
+          console.log(`Found Chrome in Replit at: ${chromePath}`);
+          return chromePath;
         }
-      } else if (existsSync(chromePath)) {
-        console.log(`Found Chrome in Replit at: ${chromePath}`);
-        return chromePath;
       }
     }
     
-    // Try to find using which command
+    // If we haven't found Chrome yet, try installing it
+    console.log('Chrome not found in common locations, attempting to install Chrome...');
     try {
-      const chromiumPath = execSync('which chromium-browser || which chromium || which google-chrome').toString().trim();
-      if (chromiumPath) {
-        console.log(`Found Chrome using 'which' command: ${chromiumPath}`);
-        return chromiumPath;
+      console.log('Running: npx puppeteer browsers install chrome');
+      execSync('npx puppeteer browsers install chrome', { stdio: 'inherit' });
+      
+      // After installation, check if Chrome is now available
+      if (existsSync(exactChromePath)) {
+        console.log(`Chrome installed successfully at: ${exactChromePath}`);
+        return exactChromePath;
       }
     } catch (err) {
-      console.log('Chrome not found using which command');
+      console.log(`Failed to install Chrome: ${err.message}`);
     }
+    
+    // If all else fails, return a default path for Replit
+    console.log('Using default Chrome path for Replit');
+    return '/home/runner/.cache/puppeteer/chrome/linux-133.0.6943.126/chrome-linux64/chrome';
   }
   
   // Check common paths based on OS

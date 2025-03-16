@@ -64,7 +64,7 @@ export class ClaudeService {
       // Make the API call to Claude with the correct format
       const response = await this.anthropic.messages.create({
         model: 'claude-3-7-sonnet-latest',
-        max_tokens: 400000,
+        max_tokens: 40000,
         system: systemContent,
         messages: [
           { role: 'user', content: userMessage }
