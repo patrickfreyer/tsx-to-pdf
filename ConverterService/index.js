@@ -112,6 +112,25 @@ async function findChromePath() {
   if (isReplit) {
     console.log('Detected Replit environment, checking Replit-specific paths');
     
+    // Try to find Chromium in Nix store first (Replit specific)
+    try {
+      // Use execSync to find all possible chromium executables in the Nix store
+      const nixStorePaths = execSync('find /nix/store -name "chromium" -type f -executable 2>/dev/null || true').toString().trim().split('\n');
+      if (nixStorePaths.length > 0 && nixStorePaths[0]) {
+        console.log(`Found Chromium in Nix store: ${nixStorePaths[0]}`);
+        return nixStorePaths[0];
+      }
+      
+      // Alternative way to find chromium-browser
+      const chromiumBrowserPaths = execSync('find /nix/store -name "chromium-browser" -type f -executable 2>/dev/null || true').toString().trim().split('\n');
+      if (chromiumBrowserPaths.length > 0 && chromiumBrowserPaths[0]) {
+        console.log(`Found chromium-browser in Nix store: ${chromiumBrowserPaths[0]}`);
+        return chromiumBrowserPaths[0];
+      }
+    } catch (error) {
+      console.log('Error searching Nix store:', error.message);
+    }
+    
     // DIRECT PATH: Use the exact path we know Chrome is installed at from the error message
     const exactChromePath = '/home/runner/.cache/puppeteer/chrome/linux-133.0.6943.126/chrome-linux64/chrome';
     if (existsSync(exactChromePath)) {
@@ -137,95 +156,30 @@ async function findChromePath() {
     // Common Chrome paths in Replit
     const replitPaths = [
       '/home/runner/.cache/puppeteer/chrome/linux-*/chrome-linux*/chrome',
-      '/nix/store/*/chromium-*/bin/chromium',
+      '/nix/store/*/chromium*/bin/chromium',
+      '/nix/store/*/chromium*/bin/chromium-browser',
       '/usr/bin/chromium-browser',
       '/usr/bin/chromium',
       '/usr/bin/google-chrome'
     ];
     
-    // Try to find Chrome in Replit paths
-    for (const chromePath of replitPaths) {
-      if (chromePath.includes('*')) {
-        // Handle wildcard paths
+    // Try to globsearch for chromium in Nix store
+    for (const pattern of replitPaths) {
+      if (pattern.includes('*')) {
         try {
-          // Get the parent directory
-          const parentDir = path.dirname(chromePath.split('*')[0]);
-          if (existsSync(parentDir)) {
-            // Use find command for more reliable wildcard path resolution
-            const findCmd = `find ${parentDir} -path "${chromePath}" -type f 2>/dev/null`;
-            console.log(`Executing find command: ${findCmd}`);
-            
-            try {
-              const foundPaths = execSync(findCmd).toString().trim().split('\n');
-              if (foundPaths.length > 0 && foundPaths[0]) {
-                const foundPath = foundPaths[0];
-                console.log(`Found Chrome using find command: ${foundPath}`);
-                
-                // Check if executable and try to make it executable if not
-                try {
-                  execSync(`test -x "${foundPath}"`);
-                } catch (err) {
-                  console.log(`Chrome exists but is not executable, attempting to make it executable: ${foundPath}`);
-                  try {
-                    execSync(`chmod +x "${foundPath}"`);
-                    console.log('Successfully made Chrome executable');
-                  } catch (chmodErr) {
-                    console.log(`Failed to make Chrome executable: ${chmodErr.message}`);
-                  }
-                }
-                
-                return foundPath;
-              }
-            } catch (findErr) {
-              console.log(`Error executing find command: ${findErr.message}`);
-            }
-            
-            // Fallback to directory listing if find command fails
-            try {
-              const dirs = await fs.readdir(parentDir);
-              for (const dir of dirs) {
-                const fullPath = chromePath.replace('*', dir).replace('*', '');
-                if (existsSync(fullPath)) {
-                  console.log(`Found Chrome in Replit at: ${fullPath}`);
-                  return fullPath;
-                }
-              }
-            } catch (err) {
-              console.log(`Error checking wildcard path ${chromePath}: ${err.message}`);
-            }
+          const foundPaths = execSync(`find ${pattern} -type f -executable 2>/dev/null || true`).toString().trim().split('\n');
+          if (foundPaths.length > 0 && foundPaths[0]) {
+            console.log(`Found Chrome/Chromium at: ${foundPaths[0]}`);
+            return foundPaths[0];
           }
-        } catch (err) {
-          console.log(`Error checking wildcard path ${chromePath}: ${err.message}`);
+        } catch (error) {
+          // Continue to next pattern if this one fails
+          console.log(`Error searching pattern ${pattern}:`, error.message);
         }
-      } else if (existsSync(chromePath)) {
-        console.log(`Found Chrome in Replit at: ${chromePath}`);
-        return chromePath;
+      } else if (existsSync(pattern)) {
+        console.log(`Found Chrome in Replit at: ${pattern}`);
+        return pattern;
       }
-    }
-    
-    // Try to find using which command
-    try {
-      const chromiumPath = execSync('which chromium-browser || which chromium || which google-chrome').toString().trim();
-      if (chromiumPath) {
-        console.log(`Found Chrome using 'which' command: ${chromiumPath}`);
-        return chromiumPath;
-      }
-    } catch (err) {
-      console.log('Chrome not found using which command');
-    }
-    
-    // Last resort for Replit: Try to install Chrome and get its path
-    console.log('Attempting to install Chrome as a last resort');
-    try {
-      execSync('npx puppeteer browsers install chrome', { stdio: 'inherit' });
-      // After installation, try to get the path from puppeteer itself
-      const puppeteerPath = puppeteer.executablePath();
-      console.log(`Puppeteer reports Chrome path after installation: ${puppeteerPath}`);
-      if (existsSync(puppeteerPath)) {
-        return puppeteerPath;
-      }
-    } catch (err) {
-      console.log(`Error installing Chrome: ${err.message}`);
     }
   }
   
@@ -368,6 +322,15 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
       '--disable-gpu'
     ],
     ignoreDefaultArgs: ['--disable-extensions'],
+    env: {
+      ...process.env,
+      // Add LD_LIBRARY_PATH to help find system libraries
+      LD_LIBRARY_PATH: [
+        '/nix/store/*/lib',
+        '/nix/store/*/lib64',
+        process.env.LD_LIBRARY_PATH
+      ].filter(Boolean).join(':')
+    }
   };
   
   // Add executable path if found

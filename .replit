@@ -16,3 +16,7 @@ build = ["sh", "-c", "npm install"]
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[[ports]]
+localPort = 24678
+externalPort = 3000
