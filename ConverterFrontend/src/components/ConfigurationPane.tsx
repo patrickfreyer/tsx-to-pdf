@@ -125,20 +125,26 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
             <label className="block text-gray-300 font-semibold mb-2">Select Components</label>
             <select
               className="w-full p-2 bg-black/30 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-              value={selectedComponents.map(c => c.file)}
-              onChange={handleComponentSelection}
-              disabled={isLoading || components.length === 0}
               multiple
               size={Math.min(5, components.length || 1)}
+              defaultValue={[]}
+              onChange={handleComponentSelection}
+              disabled={isLoading || components.length === 0}
             >
-              {components.length === 0 && (
-                <option value="">No components available</option>
+              {components.length === 0 ? (
+                <option value="" disabled>No components available</option>
+              ) : (
+                components.map((component) => (
+                  <option 
+                    key={component.file} 
+                    value={component.file}
+                    className="py-1"
+                    selected={selectedComponents.some(sc => sc.file === component.file)}
+                  >
+                    {component.componentName || component.file}
+                  </option>
+                ))
               )}
-              {components.map((component) => (
-                <option key={component.file} value={component.file}>
-                  {component.componentName}
-                </option>
-              ))}
             </select>
             <p className="mt-1 text-sm text-gray-400">Hold Ctrl/Cmd to select multiple components</p>
           </div>
