@@ -40,28 +40,28 @@ const TwoPaneLayout: React.FC = () => {
 
   useEffect(() => {
     // Fetch available components from the API
-    const fetchComponents = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`${API_URL}/components`);
-        const data = await response.json();
-        
-        if (data.success) {
-          setComponents(data.components);
-          if (data.components.length > 0) {
-            setSelectedComponents([data.components[0]]);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching components:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     fetchComponents();
     fetchOutputFiles();
   }, []);
+
+  const fetchComponents = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${API_URL}/components`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setComponents(data.components);
+        if (data.components.length > 0) {
+          setSelectedComponents([data.components[0]]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching components:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchOutputFiles = async () => {
     try {
@@ -239,6 +239,8 @@ const TwoPaneLayout: React.FC = () => {
             onFileUpload={handleFileUpload}
             uploadStatus={uploadStatus}
             isUploading={isUploading}
+            outputFiles={outputFiles}
+            onRefreshOutputFiles={fetchOutputFiles}
           />
         )}
         

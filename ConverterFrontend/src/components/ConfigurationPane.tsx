@@ -23,10 +23,10 @@ interface ExportOptions {
 interface ConfigurationPaneProps {
   components: Component[];
   selectedComponents: Component[];
-  onComponentSelectionChange: (selectedComponents: Component[]) => void;
+  setSelectedComponents: (selectedComponents: Component[]) => void;
   outputFiles: OutputFile[];
   onExport: (outputFileName: string, options: ExportOptions) => Promise<void>;
-  onRefreshOutputFiles: () => void;
+  onRefreshOutputFiles?: () => void;
   isLoading: boolean;
   exportMessage: string;
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -42,7 +42,7 @@ const API_URL = window.location.hostname === 'localhost'
 const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
   components,
   selectedComponents,
-  onComponentSelectionChange,
+  setSelectedComponents,
   outputFiles,
   onExport,
   onRefreshOutputFiles,
@@ -73,7 +73,7 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
     const newSelectedComponents = components.filter(component => 
       selectedComponentFiles.includes(component.file)
     );
-    onComponentSelectionChange(newSelectedComponents);
+    setSelectedComponents(newSelectedComponents);
   };
 
   return (
@@ -284,7 +284,7 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
             <h2 className="text-lg font-semibold text-blue-300">Output Files</h2>
             <button
               className="text-sm bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 py-1.5 px-3 rounded-lg transition-colors"
-              onClick={onRefreshOutputFiles}
+              onClick={onRefreshOutputFiles || (() => {})}
             >
               <span className="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
