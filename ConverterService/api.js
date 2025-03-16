@@ -220,16 +220,11 @@ export async function saveUploadedFile(file) {
     // Trigger the component update by running the setup-dev-server script
     // This will update the frontend-build server with the new component
     try {
-      console.log('Updating frontend-build server with new component...');
-      exec('node setup-dev-server.js', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
-        if (error) {
-          console.error('Error updating frontend-build server:', error);
-          return;
-        }
-        console.log('Frontend-build server updated successfully');
-      });
+      console.log('Updating component files for preview...');
+      execSync('node setup-dev-server.js', { stdio: 'inherit' });
+      console.log('Component files updated successfully');
     } catch (updateError) {
-      console.error('Error triggering component update:', updateError);
+      console.error('Error updating component files:', updateError);
       // Continue even if update fails, as the file is already saved
     }
     
@@ -290,9 +285,23 @@ export async function saveGeneratedComponent(componentName, tsxCode) {
     // Write the TSX code to the file
     await fs.writeFile(filePath, tsxCode, 'utf8');
     
+    // Trigger the setup-dev-server.js script to update the component files
+    console.log('Updating component files for preview...');
+    try {
+      execSync('node setup-dev-server.js', { stdio: 'inherit' });
+      console.log('Component files updated successfully');
+    } catch (setupError) {
+      console.error('Error updating component files:', setupError);
+      // Continue even if the setup script fails
+    }
+    
     return {
       success: true,
-      filePath: fileName
+      filePath: fileName,
+      routeName: componentName
+        .split('-')
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join('')
     };
   } catch (error) {
     console.error('Error saving generated component:', error);
