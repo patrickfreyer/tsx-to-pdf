@@ -7,10 +7,10 @@ const QyzUzatuProgram = () => {
       {/* Header Section */}
       <div className="text-center mb-8 p-6 bg-amber-900/30 backdrop-blur-sm rounded-lg border border-teal-500/20">
         <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-amber-200 to-teal-200 bg-clip-text text-transparent">Qyz Uzatu</h1>
-        <p className="text-xl mb-4 text-amber-100">A Traditional Kazakh Farewell Celebration</p>
+        <p className="text-xl mb-4 text-amber-100">A Traditional Kazakh Farewell & Civil Wedding Celebration</p>
         <p className="mb-4 text-amber-200">Karaganda, Kazakhstan • June 18-21, 2025</p>
-        <p className="mb-2 text-amber-100">In honor of Sofya</p>
-        <p className="text-sm text-amber-200">Hosted by Natalya & Piotr</p>
+        <p className="mb-2 text-amber-100">In honor of Sofya Durneva & Patrick Freyer</p>
+        <p className="text-sm text-amber-200">Hosted by Natalya & Piotr Durnev</p>
         
         <div className="mt-6 p-4 bg-amber-950/40 rounded-lg text-amber-200 text-sm">
           <Heart className="inline-block mr-2 h-4 w-4 text-rose-300" />
@@ -41,9 +41,6 @@ const QyzUzatuProgram = () => {
             <p className="text-amber-100">
               <span className="text-teal-300 font-bold">Karaganda:</span> The fourth-largest city, historically important for coal mining and as a cultural center in central Kazakhstan.
             </p>
-            <p className="text-amber-100">
-              <span className="text-teal-300 font-bold">Journey:</span> The trip from Astana to Karaganda covers approximately 220 km through the Kazakh Steppe and takes about 3 hours by car.
-            </p>
           </div>
           
           <div className="space-y-2 text-sm">
@@ -54,10 +51,7 @@ const QyzUzatuProgram = () => {
               <span className="text-teal-300 font-bold">Traditions:</span> Kazakh culture places high importance on hospitality, respect for elders, and family celebrations like the Qyz Uzatu.
             </p>
             <p className="text-amber-100">
-              <span className="text-teal-300 font-bold">Cuisine:</span> Features horse meat, lamb, dairy products, and traditional dishes like Beshbarmak (boiled meat with noodles) and Baursak (fried dough).
-            </p>
-            <p className="text-amber-100">
-              <span className="text-teal-300 font-bold">Transportation:</span> All travel between venues and cities will be arranged for guests during the celebration.
+              <span className="text-teal-300 font-bold">Cuisine:</span> Cuisine is rich in meat from the local steppe alongside dairy products. Traditional dishes include Beshbarmak (boiled meat with noodles) and Baursak (fried dough).
             </p>
           </div>
         </div>
@@ -82,7 +76,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100">Arrival in Astana</p>
-                <p className="text-xs text-amber-200">Early check-in available</p>
+                <p className="text-xs text-amber-200">Early check-in</p>
                 <p className="text-xs text-amber-300 italic">Rest after night flight</p>
               </div>
             </div>
@@ -94,7 +88,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100">Astana City Tour</p>
-                <p className="text-xs text-amber-200">Exploring Kazakhstan's capital</p>
+                <p className="text-xs text-amber-200">Exploring Kazakhstan's futuristic capital</p>
               </div>
             </div>
             
@@ -105,7 +99,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100">Lunch</p>
-                <p className="text-xs text-amber-200">Traditional Kazakh cuisine</p>
+                <p className="text-xs text-amber-200">Traditional Kazakh Lunch</p>
               </div>
             </div>
             
@@ -116,7 +110,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100">Cultural Program & Dinner</p>
-                <p className="text-xs text-amber-200">Traditional entertainment</p>
+                <p className="text-xs text-amber-200">Traditional Kazakh entertainment</p>
               </div>
             </div>
             
@@ -132,6 +126,9 @@ const QyzUzatuProgram = () => {
                   </div>
                   <div className="bg-amber-800/30 p-2 rounded text-xs">
                     <p className="text-amber-200">Stag Party</p>
+                  </div>
+                  <div className="bg-green-800/30 p-2 rounded text-xs">
+                    <p className="text-green-200">Cultural Program</p>
                   </div>
                 </div>
               </div>
@@ -149,13 +146,13 @@ const QyzUzatuProgram = () => {
           </div>
           
           <div className="space-y-3">
-            <div className="flex">
+          <div className="flex">
               <div className="w-16 text-amber-300 flex-shrink-0">
                 <Clock className="inline-block h-4 w-4 mr-1" />
-                <span className="text-xs">09:00</span>
+                <span className="text-xs">08:30</span>
               </div>
               <div>
-                <p className="text-amber-100">Check-out from Astana</p>
+                <p className="text-amber-100">International Breakfast Buffet before Check-out</p>
               </div>
             </div>
             
@@ -166,7 +163,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100">Astana Grand Mosque Visit</p>
-                <p className="text-xs text-amber-200">Cultural exploration</p>
+                <p className="text-xs text-amber-200">Tour of the largest mosque in Central Asia</p>
               </div>
             </div>
             
@@ -177,7 +174,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100">Trip to Karaganda</p>
-                <p className="text-xs text-amber-200">~3 hour journey</p>
+                <p className="text-xs text-amber-200">~3 hour journey by bus</p>
               </div>
             </div>
             
@@ -187,7 +184,7 @@ const QyzUzatuProgram = () => {
                 <span className="text-xs">13:30</span>
               </div>
               <div>
-                <p className="text-amber-100">Lunch in Karaganda</p>
+                <p className="text-amber-100">Welcome Lunch in Karaganda</p>
               </div>
             </div>
             
@@ -209,10 +206,10 @@ const QyzUzatuProgram = () => {
               <div>
                 <div className="flex space-x-2">
                   <div className="bg-teal-800/30 p-2 rounded text-xs">
-                    <p className="text-teal-200">Russian Manicure <span className="text-teal-300">(Girls)</span></p>
+                    <p className="text-teal-200">Russian Manicure <span className="text-teal-300">(Bridal Party)</span></p>
                   </div>
                   <div className="bg-amber-800/30 p-2 rounded text-xs">
-                    <p className="text-amber-200">Shooting Range <span className="text-amber-300">(Boys)</span></p>
+                    <p className="text-amber-200">Shooting Range <span className="text-amber-300">(Grooms Party)</span></p>
                   </div>
                 </div>
               </div>
@@ -248,7 +245,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100">Civil Wedding Ceremony</p>
-                <p className="text-xs text-amber-200">Official celebration</p>
+                <p className="text-xs text-amber-200">Official ceremony and signing</p>
               </div>
             </div>
             
@@ -259,7 +256,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100">Photo Session</p>
-                <p className="text-xs text-amber-200">Capturing memories</p>
+                <p className="text-xs text-amber-200">Photo opportunity with the bride and groom alongside wedding reception</p>
               </div>
             </div>
             
@@ -281,7 +278,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100 font-bold">Main Qyz Uzatu Celebration Dinner</p>
-                <p className="text-xs text-amber-200">Traditional ceremonial event</p>
+                <p className="text-xs text-amber-200">Traditional ceremonial event with Kazakh surprises and fusion cuisine</p>
               </div>
             </div>
             
@@ -291,8 +288,8 @@ const QyzUzatuProgram = () => {
                 <span className="text-xs">22:00</span>
               </div>
               <div>
-                <p className="text-amber-100">Nightclub Celebration</p>
-                <p className="text-xs text-amber-200">Modern festivities</p>
+                <p className="text-amber-100">Afterparty</p>
+                <p className="text-xs text-amber-200">Karaganda Nightlife</p>
               </div>
             </div>
           </div>
@@ -314,8 +311,8 @@ const QyzUzatuProgram = () => {
                 <span className="text-xs">Morning</span>
               </div>
               <div>
-                <p className="text-amber-100">Rest & Free Time</p>
-                <p className="text-xs text-amber-200">Recovery from celebrations</p>
+                <p className="text-amber-100">Breakfast and Rest</p>
+                <p className="text-xs text-amber-200">Optional spa time</p>
               </div>
             </div>
             
@@ -325,8 +322,8 @@ const QyzUzatuProgram = () => {
                 <span className="text-xs">13:00</span>
               </div>
               <div>
-                <p className="text-amber-100">Second Day Afterparty</p>
-                <p className="text-xs text-amber-200">Relaxed gathering</p>
+                <p className="text-amber-100">Garden Afterparty</p>
+                <p className="text-xs text-amber-200">Buffet and drinks at the home of Natalya and Piotr</p>
               </div>
             </div>
             
@@ -357,8 +354,7 @@ const QyzUzatuProgram = () => {
           <div className="space-y-3 text-sm">
             <p className="text-amber-100"><span className="text-teal-300 font-bold">Qyz Uzatu:</span> The celebration signifies the bride's journey from her family home to her new life, literally meaning "seeing off the girl".</p>
             <p className="text-amber-100"><span className="text-teal-300 font-bold">Ceremony:</span> Features traditional music (dombra), blessings (bata), and the bride's farewell to her family.</p>
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Gifts:</span> Traditional gifts include jewelry, fabric, and household items symbolizing prosperity and family blessings.</p>
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Attire:</span> Consider elegant attire in bright colors; traditional elements are appreciated but not required.</p>
+            <p className="text-amber-100"><span className="text-teal-300 font-bold">Attire:</span> Consider elegant attire in friendly colors; traditional attire is welcomed but not required.</p>
           </div>
         </div>
         
@@ -372,9 +368,10 @@ const QyzUzatuProgram = () => {
           
           <div className="space-y-3 text-sm">
             <p className="text-amber-100"><span className="text-teal-300 font-bold">Weather:</span> June in Kazakhstan is generally warm (20-30°C/68-86°F) with occasional rain. Pack light layers and sunscreen.</p>
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Language:</span> Kazakh and Russian are widely spoken. Many younger people in urban areas speak some English.</p>
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Currency:</span> The Kazakhstani Tenge (KZT). It's advisable to have some cash; major cards are accepted in cities.</p>
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Etiquette:</span> Respect for elders is important. Small gifts for hosts are appreciated. Remove shoes when entering homes.</p>
+            <p className="text-amber-100"><span className="text-teal-300 font-bold">Language:</span> Kazakh and Russian are widely spoken. Many younger people in urban areas speak some English. Signage is predominantly in Russian.</p>
+            <p className="text-amber-100"><span className="text-teal-300 font-bold">Currency:</span> The Kazakhstani Tenge (KZT). The country is mostly cash-free and accepts major cards.</p>
+            <p className="text-amber-100"><span className="text-teal-300 font-bold">Etiquette:</span> Respect for elders is important. Shoes must be removed when entering homes.</p>
+            <p className="text-amber-100"><span className="text-teal-300 font-bold">Transportation:</span> Astana International Airport is a highly modern transport hub. Within the country, Yandex taxis are the local Uber equivalent and very low cost.</p>
           </div>
         </div>
       </div>
@@ -400,7 +397,7 @@ const QyzUzatuProgram = () => {
           </div>
         </div>
         
-        <p className="text-amber-100 text-sm">With love, Natalya and Piotr</p>
+        <p className="text-amber-100 text-sm">With love, Natalya and Piotr Durnev</p>
         <p className="text-xs text-amber-300 mt-1">
           <Heart className="inline-block h-3 w-3 mr-1 text-teal-300" />
           We look forward to sharing this special moment with you
