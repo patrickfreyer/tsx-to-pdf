@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import { exec } from 'child_process';
+import { ClaudeService } from './claude-service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -241,5 +242,107 @@ export async function saveUploadedFile(file) {
   } catch (error) {
     console.error('Error saving uploaded file:', error);
     throw error;
+  }
+}
+
+/**
+ * Generates a TSX component using Claude
+ * @param {string} prompt - User prompt describing the component
+ * @param {Object} options - Generation options
+ * @returns {Promise<{success: boolean, code?: string, error?: string}>} Result object
+ */
+export async function generateTSXComponent(prompt, options = {}) {
+  try {
+    const claudeService = new ClaudeService();
+    const tsxCode = await claudeService.generateTSXComponent(prompt, options);
+    
+    return {
+      success: true,
+      code: tsxCode
+    };
+  } catch (error) {
+    console.error('Error generating TSX component:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
+ * Saves a generated TSX component to the input directory
+ * @param {string} componentName - Name for the component file (without extension)
+ * @param {string} tsxCode - The TSX code to save
+ * @returns {Promise<{success: boolean, filePath?: string, error?: string}>} Result object
+ */
+export async function saveGeneratedComponent(componentName, tsxCode) {
+  try {
+    // Convert component name to kebab-case for the file name
+    const fileName = componentName
+      .replace(/([a-z])([A-Z])/g, '$1-$2')
+      .replace(/\s+/g, '-')
+      .toLowerCase() + '.tsx';
+    
+    const inputDir = path.join(__dirname, '..', 'input');
+    const filePath = path.join(inputDir, fileName);
+    
+    // Write the TSX code to the file
+    await fs.writeFile(filePath, tsxCode, 'utf8');
+    
+    return {
+      success: true,
+      filePath: fileName
+    };
+  } catch (error) {
+    console.error('Error saving generated component:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
+ * Creates a temporary component for preview
+ * @param {string} tsxCode - The TSX code to preview
+ * @returns {Promise<{success: boolean, componentName?: string, error?: string}>} Result object
+ */
+export async function createTempComponent(tsxCode) {
+  try {
+    // Generate a unique component name for the preview
+    const timestamp = Date.now();
+    const componentName = `TempComponent${timestamp}`;
+    
+    // Extract the component name from the code if possible
+    const componentNameMatch = tsxCode.match(/function\s+([A-Za-z0-9_]+)/);
+    const constComponentMatch = tsxCode.match(/const\s+([A-Za-z0-9_]+)\s*=/);
+    
+    let extractedName = null;
+    if (componentNameMatch) {
+      extractedName = componentNameMatch[1];
+    } else if (constComponentMatch) {
+      extractedName = constComponentMatch[1];
+    }
+    
+    // Create a temporary file in the input directory
+    const tempFileName = `temp-component-${timestamp}.tsx`;
+    const inputDir = path.join(__dirname, '..', 'input');
+    const filePath = path.join(inputDir, tempFileName);
+    
+    // Write the TSX code to the file
+    await fs.writeFile(filePath, tsxCode, 'utf8');
+    
+    // Return the component name for routing
+    return {
+      success: true,
+      componentName: extractedName || componentName,
+      filePath: tempFileName
+    };
+  } catch (error) {
+    console.error('Error creating temporary component:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
 } 

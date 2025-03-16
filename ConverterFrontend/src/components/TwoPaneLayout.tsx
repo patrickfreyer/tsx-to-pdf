@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PreviewPane from './PreviewPane';
 import ConfigurationPane from './ConfigurationPane';
+import GenerateWithClaude from './GenerateWithClaude';
 
 interface Component {
   file: string;
@@ -35,6 +36,7 @@ const TwoPaneLayout: React.FC = () => {
   const [exportMessage, setExportMessage] = useState<string>('');
   const [uploadStatus, setUploadStatus] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'export' | 'output' | 'generate'>('export');
 
   useEffect(() => {
     // Fetch available components from the API
@@ -179,32 +181,118 @@ const TwoPaneLayout: React.FC = () => {
     }
   };
 
+  // Handle component generated from Claude
+  const handleComponentGenerated = async (componentName: string, tsxCode: string) => {
+    // Refresh the component list
+    await fetchComponents();
+    
+    // Show a success message
+    setExportMessage(`Component "${componentName}" generated successfully!`);
+    
+    // Clear the message after 3 seconds
+    setTimeout(() => {
+      setExportMessage('');
+    }, 3000);
+  };
+
   return (
-    <div className="w-full h-[calc(100vh-80px)]">
-      <div className="w-full h-full mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
-          {/* Left Pane - Preview */}
-          <div className="h-[calc(100%-2.75rem)]">
-            <PreviewPane selectedComponents={selectedComponents} />
-          </div>
-          
-          {/* Right Pane - Configuration */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 p-4 h-full overflow-y-auto">
-            <ConfigurationPane 
-              components={components}
-              selectedComponents={selectedComponents}
-              onComponentSelectionChange={setSelectedComponents}
-              outputFiles={outputFiles}
-              onExport={handleExport}
-              onRefreshOutputFiles={fetchOutputFiles}
-              isLoading={isLoading}
-              exportMessage={exportMessage}
-              onFileUpload={handleFileUpload}
-              isUploading={isUploading}
-              uploadStatus={uploadStatus}
-            />
-          </div>
+    <div className="flex flex-col md:flex-row h-[calc(100vh-100px)]">
+      {/* Left Panel */}
+      <div className="w-full md:w-1/2 p-4 bg-gray-800 rounded-lg shadow-lg overflow-auto">
+        {/* Tab Navigation */}
+        <div className="flex border-b border-gray-700 mb-4">
+          <button
+            className={`px-4 py-2 font-medium text-sm ${
+              activeTab === 'export' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-200'
+            }`}
+            onClick={() => setActiveTab('export')}
+          >
+            Export
+          </button>
+          <button
+            className={`px-4 py-2 font-medium text-sm ${
+              activeTab === 'output' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-200'
+            }`}
+            onClick={() => setActiveTab('output')}
+          >
+            Output Files
+          </button>
+          <button
+            className={`px-4 py-2 font-medium text-sm ${
+              activeTab === 'generate' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-200'
+            }`}
+            onClick={() => setActiveTab('generate')}
+          >
+            Generate with Claude
+          </button>
         </div>
+        
+        {/* Tab Content */}
+        {activeTab === 'export' && (
+          <ConfigurationPane
+            components={components}
+            selectedComponents={selectedComponents}
+            setSelectedComponents={setSelectedComponents}
+            onExport={handleExport}
+            isLoading={isLoading}
+            exportMessage={exportMessage}
+            onFileUpload={handleFileUpload}
+            uploadStatus={uploadStatus}
+            isUploading={isUploading}
+          />
+        )}
+        
+        {activeTab === 'output' && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Output Files</h2>
+            {outputFiles.length === 0 ? (
+              <p className="text-gray-400">No output files yet. Export some components first.</p>
+            ) : (
+              <div className="space-y-2">
+                {outputFiles.map((file, index) => (
+                  <div key={index} className="p-3 bg-gray-700 rounded flex justify-between items-center">
+                    <div>
+                      <div className="font-medium">{file.file}</div>
+                      <div className="text-xs text-gray-400">
+                        {file.size} • {file.createdAt}
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <a
+                        href={`${API_URL}/output/${file.file}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                      >
+                        View
+                      </a>
+                      <a
+                        href={`${API_URL}/output/${file.file}?download=true`}
+                        className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                      >
+                        Download
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        
+        {activeTab === 'generate' && (
+          <GenerateWithClaude 
+            onComponentGenerated={handleComponentGenerated}
+            apiUrl={API_URL}
+          />
+        )}
+      </div>
+      
+      {/* Right Panel - Preview */}
+      <div className="w-full md:w-1/2 p-4 bg-gray-800 rounded-lg shadow-lg mt-4 md:mt-0 md:ml-4 overflow-auto">
+        <PreviewPane
+          selectedComponents={selectedComponents}
+        />
       </div>
     </div>
   );

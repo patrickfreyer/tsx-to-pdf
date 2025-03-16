@@ -6,11 +6,19 @@ A tool to convert React TSX components to PDF files with proper formatting.
 
 - Node.js (v14 or higher)
 - npm or yarn
+- Anthropic Claude API key (for component generation)
 
 ## Installation
 
 ```bash
 npm install
+```
+
+Set up your environment variable for the Claude API key:
+
+```bash
+# Create a .env file in the root directory
+echo "ANTHROPIC_API_KEY=your_api_key_here" > .env
 ```
 
 ## Quick Start
@@ -39,6 +47,7 @@ The tool now includes a web-based user interface for easier use:
    - Configure export options (aspect ratio, paper size, orientation, etc.)
    - Export the component to PDF
    - View and download previously exported PDF files
+   - Generate new components with Claude AI
 
 The UI provides a simple and intuitive way to export your TSX components without having to use the command line.
 
@@ -58,6 +67,27 @@ The Output Files tab allows you to:
 - See file details (size, creation date)
 - View PDFs directly in the browser
 - Download PDFs to your computer
+
+### Generate with Claude Tab
+
+The Generate with Claude tab allows you to:
+- Create TSX components by describing what you want
+- Preview generated components
+- Save components to the input directory
+- Export generated components directly to PDF
+
+#### Using Claude for Component Generation
+
+1. Describe the component you want to create
+2. Click "Generate Component"
+3. Review the generated code
+4. Save the component or make edits
+5. Export to PDF using the Export tab
+
+Example prompts:
+- "Create a dashboard with charts showing user activity"
+- "Make a pricing comparison table with three tiers"
+- "Design a timeline component showing project milestones"
 
 ## Manual Usage
 
@@ -134,6 +164,17 @@ npm run convert input/complex-flowchart.tsx --paper-size=Letter --margin=20
 3. It navigates to `http://localhost:5174/ComponentName` using Puppeteer
 4. It captures the rendered component as a PDF, automatically sizing the PDF to fit the content
 5. If multiple TSX files are provided, it merges them into a single PDF
+
+### Claude Integration
+
+The Claude integration works as follows:
+1. The user provides a description of the component they want to create
+2. The description is sent to Claude using the API key from the environment variable
+3. Claude generates TSX code for the component using the claude-3-7-sonnet-latest model
+4. The code is saved as a temporary file in the input directory
+5. The component is rendered in the RenderingServer
+6. The user can preview the component, make edits, and save it permanently
+7. The component can then be exported to PDF like any other component
 
 ## Project Structure
 

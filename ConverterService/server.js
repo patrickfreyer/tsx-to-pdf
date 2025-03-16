@@ -2,9 +2,21 @@ import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { listComponents, exportComponent, listOutputFiles, saveUploadedFile } from './api.js';
+import dotenv from 'dotenv';
+import { 
+  listComponents, 
+  exportComponent, 
+  listOutputFiles, 
+  saveUploadedFile,
+  generateTSXComponent,
+  saveGeneratedComponent,
+  createTempComponent
+} from './api.js';
 import multer from 'multer';
 import fs from 'fs';
+
+// Load environment variables from .env file
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -148,6 +160,63 @@ app.post('/api/upload', upload.single('tsxFile'), async (req, res) => {
       message: 'Failed to upload file', 
       error: error.message 
     });
+  }
+});
+
+// Add Claude API endpoints
+app.post('/api/claude/generate', express.json(), async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    
+    if (!prompt) {
+      return res.status(400).json({ success: false, error: 'Prompt is required' });
+    }
+    
+    // We're no longer using requirements or styling guidelines
+    const options = {
+      requirements: [],
+      stylingGuidelines: [],
+    };
+    
+    const result = await generateTSXComponent(prompt, options);
+    
+    if (!result.success) {
+      return res.status(500).json(result);
+    }
+    
+    // Create a temporary component for preview
+    const tempComponent = await createTempComponent(result.code);
+    
+    return res.json({
+      success: true,
+      code: result.code,
+      previewComponent: tempComponent.success ? tempComponent.componentName : null,
+      previewFile: tempComponent.success ? tempComponent.filePath : null
+    });
+  } catch (error) {
+    console.error('Error generating component:', error);
+    return res.status(500).json({ success: false, error: 'Failed to generate component' });
+  }
+});
+
+app.post('/api/components/save', express.json(), async (req, res) => {
+  try {
+    const { componentName, tsxCode } = req.body;
+    
+    if (!componentName) {
+      return res.status(400).json({ success: false, error: 'Component name is required' });
+    }
+    
+    if (!tsxCode) {
+      return res.status(400).json({ success: false, error: 'TSX code is required' });
+    }
+    
+    const result = await saveGeneratedComponent(componentName, tsxCode);
+    
+    return res.json(result);
+  } catch (error) {
+    console.error('Error saving component:', error);
+    return res.status(500).json({ success: false, error: 'Failed to save component' });
   }
 });
 

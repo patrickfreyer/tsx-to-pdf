@@ -21,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <li><a href="/LlmComparisonVisualization" className="text-blue-600 hover:underline">llm-comparison-visualization</a></li>
         <li><a href="/LongevityGuide" className="text-blue-600 hover:underline">longevity-guide</a></li>
         <li><a href="/LongevityNutritionGuide" className="text-blue-600 hover:underline">longevity-nutrition-guide</a></li>
+        <li><a href="/QyzUzatuProgram" className="text-blue-600 hover:underline">qyz-uzatu-program</a></li>
         <li><a href="/SynthoratedDashboard" className="text-blue-600 hover:underline">synthorated-dashboard</a></li>
         <li><a href="/ThinkingLlmVisualization" className="text-blue-600 hover:underline">thinking-llm-visualization</a></li>
       </ul>
