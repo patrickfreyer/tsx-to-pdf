@@ -10,8 +10,7 @@ import {
   saveUploadedFile,
   generateTSXComponent,
   saveGeneratedComponent,
-  createTempComponent,
-  exportComponentSSR
+  createTempComponent
 } from './api.js';
 import multer from 'multer';
 import fs from 'fs';
@@ -128,40 +127,15 @@ app.post('/api/export', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Component file is required' });
     }
     
-    console.log(`Export requested for ${componentFile} to ${outputFile || 'default output'}`);
-    
-    // Use the SSR-based export method by default
-    const result = await exportComponentSSR(componentFile, outputFile, options);
+    const result = await exportComponent(componentFile, outputFile, options);
     res.json(result);
   } catch (error) {
     console.error('Error exporting component:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Failed to export component', 
-      error: error.message
-    });
-  }
-});
-
-// Legacy endpoint for compatibility (also uses SSR method)
-app.post('/api/export-ssr', async (req, res) => {
-  try {
-    const { componentFile, outputFile, options } = req.body;
-    
-    if (!componentFile) {
-      return res.status(400).json({ success: false, message: 'Component file is required' });
-    }
-    
-    console.log(`SSR export requested for ${componentFile} to ${outputFile || 'default output'}`);
-    
-    const result = await exportComponentSSR(componentFile, outputFile, options);
-    res.json(result);
-  } catch (error) {
-    console.error('Error exporting component with SSR:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to export component with SSR', 
-      error: error.message
+      error: error.message,
+      command: error.command
     });
   }
 });

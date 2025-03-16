@@ -5,7 +5,6 @@ import fs from 'fs/promises';
 import { exec } from 'child_process';
 import { ClaudeService } from './claude-service.js';
 import { execSync } from 'child_process';
-import { convertTsxToPdfWithSSR } from './ssr-converter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -99,53 +98,106 @@ export async function listOutputFiles() {
 }
 
 /**
- * Exports a TSX component to PDF using Server-Side Rendering
+ * Exports a TSX component to PDF
  * @param {string} componentFile - The TSX file to export
  * @param {string} outputFile - The output PDF file name
  * @param {Object} options - Export options
- * @returns {Promise<{success: boolean, message: string, file: string}>} Result of the export operation
+ * @returns {Promise<{success: boolean, message: string, command: string}>} Result of the export operation
  */
 export async function exportComponent(componentFile, outputFile, options = {}) {
   return new Promise((resolve, reject) => {
     // Log the received options
     console.log(`Export options received: ${JSON.stringify(options, null, 2)}`);
     
-    try {
-      const inputPath = `input/${componentFile}`;
-      
-      console.log(`Starting SSR-based export of ${inputPath} to ${outputFile}`);
-      
-      // Call the SSR converter directly with options
-      convertTsxToPdfWithSSR([inputPath], outputFile, options)
-        .then(outputPath => {
-          console.log(`SSR-based PDF export complete: ${outputPath}`);
-          resolve({
-            success: true,
-            file: outputPath,
-            message: `Component exported to ${outputPath}`
-          });
-        })
-        .catch(error => {
-          console.error('Error in SSR-based export:', error.message);
-          reject({
-            success: false,
-            message: `Error exporting component: ${error.message}`
-          });
+    // Build the command arguments - call node directly instead of using npm run
+    const args = ['ConverterService/cli.js', `input/${componentFile}`];
+    
+    // Add output file if provided
+    if (outputFile) {
+      args.push(outputFile);
+    }
+    
+    // Add options
+    if (options.width !== undefined) {
+      // Ensure width is a number
+      const numericWidth = parseInt(options.width, 10);
+      if (!isNaN(numericWidth)) {
+        args.push(`--width=${numericWidth}`);
+        console.log(`Using width: ${numericWidth}`);
+      } else {
+        console.warn(`Invalid width value: ${options.width}, not adding to command`);
+      }
+    } else {
+      console.log('No width specified in options');
+    }
+    
+    if (options.widthPreset) {
+      args.push(`--width-preset=${options.widthPreset}`);
+    }
+    
+    if (options.margin !== undefined) {
+      args.push(`--margin=${options.margin}`);
+    }
+    
+    if (options.autoSize === false) {
+      args.push('--no-auto-size');
+    }
+    
+    if (options.debug) {
+      args.push('--debug');
+    }
+    
+    // Build the full command for display purposes
+    const command = `node ${args.join(' ')}`;
+    console.log(`Executing command: ${command}`);
+    
+    // Execute the command
+    const process = spawn('node', args, {
+      cwd: path.join(__dirname, '..'),
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+    
+    let stdout = '';
+    let stderr = '';
+    
+    process.stdout.on('data', (data) => {
+      stdout += data.toString();
+      console.log(data.toString());
+    });
+    
+    process.stderr.on('data', (data) => {
+      stderr += data.toString();
+      console.error(data.toString());
+    });
+    
+    process.on('close', (code) => {
+      if (code === 0) {
+        resolve({
+          success: true,
+          message: 'Export completed successfully',
+          command,
+          output: stdout
         });
-    } catch (error) {
-      console.error('Error setting up SSR-based export:', error.message);
+      } else {
+        resolve({
+          success: false,
+          message: `Export failed with code ${code}`,
+          command,
+          error: stderr
+        });
+      }
+    });
+    
+    process.on('error', (err) => {
       reject({
         success: false,
-        message: `Error exporting component: ${error.message}`
+        message: `Failed to start export process: ${err.message}`,
+        command,
+        error: err
       });
-    }
+    });
   });
 }
-
-/**
- * Legacy alias for exportComponent (for backward compatibility)
- */
-export const exportComponentSSR = exportComponent;
 
 /**
  * Saves an uploaded TSX file and returns information about it

@@ -29,24 +29,26 @@ const chalk = {
 chalk.blue = (text) => colors.blue(text);
 chalk.blue.bold = (text) => colors.blue(colors.bold(text));
 
-// Setup SSR environment
-async function setupSSREnvironment() {
-  console.log(chalk.blue('Setting up Server-Side Rendering environment...'));
-  
-  try {
-    execSync('npm run setup-ssr', { stdio: 'inherit' });
-    console.log(chalk.green('✓ SSR environment setup complete'));
-  } catch (error) {
-    console.log(chalk.yellow(`Warning during SSR environment setup: ${error.message}`));
-    console.log(chalk.yellow('Continuing anyway, but there might be issues with PDF generation.'));
-  }
-}
-
 async function startAll() {
   console.log(chalk.blue.bold('\n=== TSX to PDF Converter ===\n'));
 
-  // Setup SSR environment
-  await setupSSREnvironment();
+  // Check for Puppeteer installation
+  console.log(chalk.blue('Checking Puppeteer installation...'));
+  try {
+    execSync('npm run check-puppeteer', { stdio: 'inherit' });
+    console.log(chalk.green('✓ Puppeteer and Chrome are properly installed'));
+  } catch (err) {
+    console.error(chalk.red('Error: Puppeteer or Chrome is not properly installed.'));
+    console.error(chalk.yellow('Attempting to install Chrome for Puppeteer...'));
+    try {
+      execSync('npx puppeteer browsers install chrome', { stdio: 'inherit' });
+      console.log(chalk.green('✓ Chrome installed successfully'));
+    } catch (installErr) {
+      console.error(chalk.red('Failed to install Chrome. Please install it manually:'));
+      console.error(chalk.yellow('npx puppeteer browsers install chrome'));
+      process.exit(1);
+    }
+  }
 
   console.log(chalk.blue('Starting all services...'));
   

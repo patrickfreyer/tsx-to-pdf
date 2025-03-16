@@ -1,43 +1,5 @@
 # TSX to PDF Converter
 
-## Important Update
-This project now uses Server-Side Rendering (SSR) for PDF generation instead of Puppeteer. This brings several benefits:
-
-- No browser dependencies required (no Chrome/Chromium needed)
-- Faster PDF generation
-- More reliable in containerized environments
-- Simplified setup process
-
-## Getting Started
-
-1. Install dependencies:
-```bash
-npm install
-```
-
-2. Set up the SSR environment:
-```bash
-npm run setup-ssr
-```
-
-3. Start the development server and UI:
-```bash
-npm start
-```
-
-4. Convert a TSX file to PDF:
-```bash
-npm run convert input/your-component.tsx output/output-file.pdf
-```
-
-## Features
-
-- Server-side rendering of React components to PDF
-- Modern UI for uploading and managing TSX files
-- PDF export with customizable options
-- Preview of TSX components in the browser
-- Multiple component merging into a single PDF
-
 A tool to convert React TSX components to PDF files with proper formatting.
 
 ## Prerequisites
