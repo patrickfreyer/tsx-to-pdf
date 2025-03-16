@@ -75,13 +75,20 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
     await onExport(outputFileName, options);
   };
 
-  const handleComponentSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(event.target.selectedOptions);
-    const selectedComponentFiles = selectedOptions.map(option => option.value);
-    const newSelectedComponents = components.filter(component => 
-      selectedComponentFiles.includes(component.file)
-    );
-    setSelectedComponents(newSelectedComponents);
+  const toggleComponentSelection = (file: string) => {
+    if (componentsToDelete.includes(file)) {
+      setComponentsToDelete(componentsToDelete.filter(f => f !== file));
+    } else {
+      setComponentsToDelete([...componentsToDelete, file]);
+    }
+  };
+
+  const toggleExportSelection = (component: Component) => {
+    if (selectedComponents.some(c => c.file === component.file)) {
+      setSelectedComponents(selectedComponents.filter(c => c.file !== component.file));
+    } else {
+      setSelectedComponents([...selectedComponents, component]);
+    }
   };
 
   const handleDeleteClick = (file: string) => {
@@ -110,14 +117,6 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
     setComponentToDelete(null);
-  };
-
-  const toggleComponentSelection = (file: string) => {
-    if (componentsToDelete.includes(file)) {
-      setComponentsToDelete(componentsToDelete.filter(f => f !== file));
-    } else {
-      setComponentsToDelete([...componentsToDelete, file]);
-    }
   };
 
   const handleBatchDeleteClick = () => {
@@ -183,13 +182,16 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
         </div>
       </div>
 
-      {/* Component Management Section */}
+      {/* Unified Component Management Section */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <label className="block text-gray-300 font-semibold">Available Components</label>
+          <label className="block text-gray-300 font-semibold">Components</label>
           <div className="flex items-center space-x-2">
             {components.length > 0 && (
               <span className="text-sm text-gray-400">{components.length} component{components.length !== 1 ? 's' : ''}</span>
+            )}
+            {selectedComponents.length > 0 && (
+              <span className="text-sm text-blue-400">{selectedComponents.length} selected for export</span>
             )}
             {(onDeleteComponent || onDeleteMultipleComponents) && components.length > 0 && (
               <button
@@ -220,6 +222,8 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
                   key={component.file} 
                   className={`flex items-center justify-between p-3 hover:bg-black/20 ${
                     componentsToDelete.includes(component.file) ? 'bg-blue-900/20' : ''
+                  } ${
+                    selectedComponents.some(c => c.file === component.file) ? 'bg-green-900/20' : ''
                   }`}
                 >
                   <div className="flex items-center flex-1">
@@ -234,23 +238,55 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
                         />
                       </div>
                     )}
-                    <div className="flex-1">
-                      <p className="text-gray-200 font-medium">{component.componentName}</p>
+                    <div 
+                      className="flex-1 cursor-pointer"
+                      onClick={() => toggleExportSelection(component)}
+                    >
+                      <div className="flex items-center">
+                        <p className="text-gray-200 font-medium">{component.componentName}</p>
+                        {selectedComponents.some(c => c.file === component.file) && (
+                          <span className="ml-2 px-2 py-0.5 text-xs bg-green-900/50 text-green-300 rounded-full">
+                            Selected for export
+                          </span>
+                        )}
+                      </div>
                       <p className="text-gray-400 text-sm truncate">{component.file}</p>
                     </div>
                   </div>
-                  {onDeleteComponent && (
+                  <div className="flex items-center">
                     <button
-                      onClick={() => handleDeleteClick(component.file)}
-                      className="ml-2 p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded-lg transition-colors"
-                      title="Delete component"
+                      onClick={() => toggleExportSelection(component)}
+                      className={`mr-2 p-1.5 ${
+                        selectedComponents.some(c => c.file === component.file)
+                          ? 'text-green-400 hover:text-green-300 hover:bg-green-900/30'
+                          : 'text-blue-400 hover:text-blue-300 hover:bg-blue-900/30'
+                      } rounded-lg transition-colors`}
+                      title={selectedComponents.some(c => c.file === component.file) ? "Remove from export" : "Add to export"}
                       disabled={isLoading || isDeleting}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                      {selectedComponents.some(c => c.file === component.file) ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      )}
                     </button>
-                  )}
+                    {onDeleteComponent && (
+                      <button
+                        onClick={() => handleDeleteClick(component.file)}
+                        className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded-lg transition-colors"
+                        title="Delete component"
+                        disabled={isLoading || isDeleting}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -260,6 +296,7 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
             No components available. Upload TSX files to get started.
           </div>
         )}
+        <p className="mt-1 text-sm text-gray-400">Click on a component to select/deselect it for export</p>
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -358,28 +395,6 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
         </div>
       )}
 
-      <div className="mb-6">
-        <label className="block text-gray-300 font-semibold mb-2">Select Components for Export</label>
-        <select
-          className="w-full p-2 bg-black/30 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-          value={selectedComponents.map(c => c.file)}
-          onChange={handleComponentSelection}
-          disabled={isLoading || components.length === 0}
-          multiple
-          size={Math.min(5, components.length || 1)}
-        >
-          {components.length === 0 && (
-            <option value="">No components available</option>
-          )}
-          {components.map((component) => (
-            <option key={component.file} value={component.file}>
-              {component.componentName}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1 text-sm text-gray-400">Hold Ctrl/Cmd to select multiple components</p>
-      </div>
-      
       <div className="mb-6">
         <label className="block text-gray-300 font-semibold mb-2">Output File Name</label>
         <input

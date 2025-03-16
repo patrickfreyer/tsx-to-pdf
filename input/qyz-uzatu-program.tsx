@@ -52,12 +52,39 @@ const QyzUzatuProgram = () => {
             <p className="text-amber-100">
               <span className="text-teal-300 font-bold">Traditions:</span> Kazakh culture places high importance on hospitality, respect for elders, and family celebrations like the Qyz Uzatu.
             </p>
-            <p className="text-amber-100">
-              <span className="text-teal-300 font-bold">Cuisine:</span> Features horse meat, lamb, dairy products, and traditional dishes like Beshbarmak (boiled meat with noodles) and Baursak (fried dough).
-            </p>
-            <p className="text-amber-100">
-              <span className="text-teal-300 font-bold">Transportation:</span> All travel between venues and cities will be arranged for guests during the celebration.
-            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Legend Section */}
+      <div className="mb-8 bg-amber-900/30 backdrop-blur-sm p-5 rounded-lg border border-teal-500/20">
+        <div className="flex items-center mb-4">
+          <div className="bg-teal-800/50 rounded-full p-2 mr-3">
+            <Info className="h-6 w-6 text-amber-200" />
+          </div>
+          <h2 className="text-lg font-bold text-amber-100">Event Legend</h2>
+        </div>
+        
+        <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
+          <div className="flex items-center">
+            <div className="bg-teal-800/30 p-2 rounded-md text-xs mr-3 min-w-24 text-center">
+              <p className="text-teal-200">Bridal Activities</p>
+            </div>
+            <p className="text-amber-100 text-sm">For the bride and female attendees</p>
+          </div>
+          
+          <div className="flex items-center">
+            <div className="bg-amber-800/30 p-2 rounded-md text-xs mr-3 min-w-24 text-center">
+              <p className="text-amber-200">Groom Activities</p>
+            </div>
+            <p className="text-amber-100 text-sm">For the groom and male attendees</p>
+          </div>
+          
+          <div className="flex items-center">
+            <div className="bg-gradient-to-r from-amber-900/50 to-teal-900/50 p-2 rounded-md text-xs mr-3 min-w-24 text-center">
+              <p className="text-amber-100">Shared Events</p>
+            </div>
+            <p className="text-amber-100 text-sm">For all guests</p>
           </div>
         </div>
       </div>
@@ -104,7 +131,7 @@ const QyzUzatuProgram = () => {
               </div>
               <div>
                 <p className="text-amber-100">Lunch</p>
-                <p className="text-xs text-amber-200">Traditional Kazakh cuisine</p>
+                <p className="text-xs text-amber-200">Traditional Kazakh Cuisine</p>
               </div>
             </div>
             
@@ -127,10 +154,10 @@ const QyzUzatuProgram = () => {
               <div>
                 <div className="flex space-x-2">
                   <div className="bg-teal-800/30 p-2 rounded text-xs">
-                    <p className="text-teal-200">Hen Party</p>
+                    <p className="text-teal-200">Bridal Celebration</p>
                   </div>
                   <div className="bg-amber-800/30 p-2 rounded text-xs">
-                    <p className="text-amber-200">Stag Party</p>
+                    <p className="text-amber-200">Groom Celebration</p>
                   </div>
                 </div>
               </div>
@@ -208,10 +235,10 @@ const QyzUzatuProgram = () => {
               <div>
                 <div className="flex space-x-2">
                   <div className="bg-teal-800/30 p-2 rounded text-xs">
-                    <p className="text-teal-200">Russian Manicure <span className="text-teal-300">(Girls)</span></p>
+                    <p className="text-teal-200">Russian Manicure <span className="text-teal-300">(Bride & female guests)</span></p>
                   </div>
                   <div className="bg-amber-800/30 p-2 rounded text-xs">
-                    <p className="text-amber-200">Shooting Range <span className="text-amber-300">(Boys)</span></p>
+                    <p className="text-amber-200">Shooting Range <span className="text-amber-300">(Groom & male guests)</span></p>
                   </div>
                 </div>
               </div>
@@ -348,22 +375,6 @@ const QyzUzatuProgram = () => {
         <div className="bg-amber-900/30 backdrop-blur-sm p-5 rounded-lg border border-teal-500/20">
           <div className="flex items-center mb-4">
             <div className="bg-teal-800/50 rounded-full p-2 mr-3">
-              <Info className="h-6 w-6 text-amber-200" />
-            </div>
-            <h2 className="text-lg font-bold text-amber-100">Cultural Insights</h2>
-          </div>
-          
-          <div className="space-y-3 text-sm">
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Qyz Uzatu:</span> The celebration signifies the bride's journey from her family home to her new life, literally meaning "seeing off the girl".</p>
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Ceremony:</span> Features traditional music (dombra), blessings (bata), and the bride's farewell to her family.</p>
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Gifts:</span> Traditional gifts include jewelry, fabric, and household items symbolizing prosperity and family blessings.</p>
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Attire:</span> Consider elegant attire in bright colors; traditional elements are appreciated but not required.</p>
-          </div>
-        </div>
-        
-        <div className="bg-amber-900/30 backdrop-blur-sm p-5 rounded-lg border border-teal-500/20">
-          <div className="flex items-center mb-4">
-            <div className="bg-teal-800/50 rounded-full p-2 mr-3">
               <Plane className="h-6 w-6 text-amber-200" />
             </div>
             <h2 className="text-lg font-bold text-amber-100">Travel Tips</h2>
@@ -373,7 +384,7 @@ const QyzUzatuProgram = () => {
             <p className="text-amber-100"><span className="text-teal-300 font-bold">Weather:</span> June in Kazakhstan is generally warm (20-30°C/68-86°F) with occasional rain. Pack light layers and sunscreen.</p>
             <p className="text-amber-100"><span className="text-teal-300 font-bold">Language:</span> Kazakh and Russian are widely spoken. Many younger people in urban areas speak some English.</p>
             <p className="text-amber-100"><span className="text-teal-300 font-bold">Currency:</span> The Kazakhstani Tenge (KZT). It's advisable to have some cash; major cards are accepted in cities.</p>
-            <p className="text-amber-100"><span className="text-teal-300 font-bold">Etiquette:</span> Respect for elders is important. Small gifts for hosts are appreciated. Remove shoes when entering homes.</p>
+            <p className="text-amber-100"><span className="text-teal-300 font-bold">Etiquette:</span> Respect for elders is important. Remove shoes when entering homes.</p>
           </div>
         </div>
       </div>
