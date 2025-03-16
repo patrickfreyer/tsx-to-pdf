@@ -6,10 +6,9 @@ const QyzUzatuProgram = () => {
     <div className="w-full bg-gradient-to-br from-amber-900 to-teal-900 p-6 rounded-lg text-amber-50 font-sans">
       {/* Header Section */}
       <div className="text-center mb-8 p-6 bg-amber-900/30 backdrop-blur-sm rounded-lg border border-teal-500/20">
-        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-amber-200 to-teal-200 bg-clip-text text-transparent">Qyz Uzatu</h1>
-        <p className="text-xl mb-4 text-amber-100">A Traditional Kazakh Farewell Celebration</p>
+        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-amber-200 to-teal-200 bg-clip-text text-transparent">Qyz Uzatu & Civil Wedding</h1>
+        <p className="text-xl mb-4 text-amber-100">A Traditional Kazakh Farewell Celebration and the Civil Wedding of Sofya & Patrick</p>
         <p className="mb-4 text-amber-200">Karaganda, Kazakhstan • June 18-21, 2025</p>
-        <p className="mb-2 text-amber-100">In honor of Sofya</p>
         <p className="text-sm text-amber-200">Hosted by Natalya & Piotr</p>
         
         <div className="mt-6 p-4 bg-amber-950/40 rounded-lg text-amber-200 text-sm">
