@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import { exec } from 'child_process';
 import { ClaudeService } from './claude-service.js';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -332,11 +333,22 @@ export async function createTempComponent(tsxCode) {
     // Write the TSX code to the file
     await fs.writeFile(filePath, tsxCode, 'utf8');
     
+    // Trigger the setup-dev-server.js script to update the component files
+    console.log('Updating component files for preview...');
+    try {
+      execSync('node setup-dev-server.js', { stdio: 'inherit' });
+      console.log('Component files updated successfully');
+    } catch (setupError) {
+      console.error('Error updating component files:', setupError);
+      // Continue even if the setup script fails
+    }
+    
     // Return the component name for routing
     return {
       success: true,
       componentName: extractedName || componentName,
-      filePath: tempFileName
+      filePath: tempFileName,
+      routeName: extractedName || componentName
     };
   } catch (error) {
     console.error('Error creating temporary component:', error);

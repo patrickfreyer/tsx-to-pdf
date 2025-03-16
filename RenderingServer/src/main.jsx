@@ -17,12 +17,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <li><a href="/ButtonShowcase" className="text-blue-600 hover:underline">button-showcase</a></li>
         <li><a href="/FlightLongevityCheatsheetV2" className="text-blue-600 hover:underline">flight-longevity-cheatsheet-v2</a></li>
         <li><a href="/FlightVisualization" className="text-blue-600 hover:underline">flight-visualization</a></li>
+        <li><a href="/FlipCard" className="text-blue-600 hover:underline">flip-card</a></li>
         <li><a href="/HubspotTrackingVisual" className="text-blue-600 hover:underline">hubspot-tracking-visual</a></li>
         <li><a href="/LlmComparisonVisualization" className="text-blue-600 hover:underline">llm-comparison-visualization</a></li>
         <li><a href="/LongevityGuide" className="text-blue-600 hover:underline">longevity-guide</a></li>
         <li><a href="/LongevityNutritionGuide" className="text-blue-600 hover:underline">longevity-nutrition-guide</a></li>
         <li><a href="/QyzUzatuProgram" className="text-blue-600 hover:underline">qyz-uzatu-program</a></li>
         <li><a href="/SynthoratedDashboard" className="text-blue-600 hover:underline">synthorated-dashboard</a></li>
+        <li><a href="/TempComponent1742121826386" className="text-blue-600 hover:underline">temp-component-1742121826386</a></li>
         <li><a href="/ThinkingLlmVisualization" className="text-blue-600 hover:underline">thinking-llm-visualization</a></li>
       </ul>
     </div>
