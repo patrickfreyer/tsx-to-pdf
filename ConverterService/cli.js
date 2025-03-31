@@ -34,11 +34,11 @@ yargs(hideBin(process.argv))
             return isNaN(parsed) ? 390 : parsed;
           }
         })
-        .option('width-preset', {
-          describe: 'Width preset',
+        .option('format', {
+          describe: 'Output format',
           type: 'string',
-          choices: ['iPhone', 'A4', 'MacBook', 'custom'],
-          default: 'iPhone',
+          choices: ['auto', 'a4'],
+          default: 'auto',
         })
         .option('margin', {
           describe: 'Margin in pixels',
@@ -64,7 +64,7 @@ yargs(hideBin(process.argv))
           files: argv.files,
           output: argv.output,
           width: argv.width,
-          widthPreset: argv['width-preset'],
+          format: argv.format,
           margin: argv.margin,
           autoSize: argv['auto-size'],
           debug: argv.debug
@@ -82,7 +82,7 @@ yargs(hideBin(process.argv))
         
         await convertTsxToPdf(argv.files, outputPath, {
           width: argv.width,
-          widthPreset: argv['width-preset'],
+          format: argv.format,
           margin: argv.margin,
           autoSize: argv['auto-size'],
           debugMode: argv.debug,

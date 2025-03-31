@@ -117,9 +117,13 @@ export async function exportComponent(componentFile, outputFile, options = {}) {
       args.push(outputFile);
     }
     
+    // Add format option
+    if (options.format) {
+      args.push(`--format=${options.format}`);
+    }
+    
     // Add options
     if (options.width !== undefined) {
-      // Ensure width is a number
       const numericWidth = parseInt(options.width, 10);
       if (!isNaN(numericWidth)) {
         args.push(`--width=${numericWidth}`);
@@ -127,20 +131,10 @@ export async function exportComponent(componentFile, outputFile, options = {}) {
       } else {
         console.warn(`Invalid width value: ${options.width}, not adding to command`);
       }
-    } else {
-      console.log('No width specified in options');
-    }
-    
-    if (options.widthPreset) {
-      args.push(`--width-preset=${options.widthPreset}`);
     }
     
     if (options.margin !== undefined) {
       args.push(`--margin=${options.margin}`);
-    }
-    
-    if (options.autoSize === false) {
-      args.push('--no-auto-size');
     }
     
     if (options.debug) {

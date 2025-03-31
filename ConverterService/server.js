@@ -127,6 +127,13 @@ app.post('/api/export', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Component file is required' });
     }
     
+    // Log received options for debugging
+    console.log('Export request received:', {
+      componentFile,
+      outputFile,
+      options
+    });
+    
     const result = await exportComponent(componentFile, outputFile, options);
     res.json(result);
   } catch (error) {

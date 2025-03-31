@@ -95,35 +95,71 @@ export class ReactPDFConverter {
           content: `
             @page {
               size: A4;
-              margin: ${this.options.margin}px;
+              margin: 0;
             }
-            body {
+            html {
+              width: 794px;
+              height: 1123px;
               margin: 0;
               padding: 0;
             }
+            body {
+              width: 794px;
+              min-height: 1123px;
+              margin: 0;
+              padding: 0;
+              overflow: hidden;
+            }
             #root {
-              width: 794px !important;
-              margin: 0 auto !important;
+              width: 794px;
+              margin: 0 !important;
+              padding: ${this.options.margin}px;
+              box-sizing: border-box;
               background-color: white;
+            }
+            /* Force page breaks */
+            .page-break {
+              width: 794px;
+              height: 1123px;
+              padding: ${this.options.margin}px;
+              margin: 0;
+              box-sizing: border-box;
+              page-break-after: always;
+              page-break-before: always;
+              position: relative;
+              overflow: hidden;
             }
             /* Add page break hints for common elements */
             h1, h2, h3 {
-              break-after: avoid;
+              page-break-after: avoid;
+              page-break-inside: avoid;
+              margin-top: 0;
             }
             img, table {
-              break-inside: avoid;
+              page-break-inside: avoid;
             }
             ul, ol {
-              break-before: avoid;
-            }
-            /* Force page breaks for elements with class */
-            .page-break {
-              break-after: page;
+              page-break-inside: avoid;
             }
             /* Prevent unwanted breaks */
             .no-break {
-              break-inside: avoid;
+              page-break-inside: avoid;
             }
+          `
+        });
+
+        // Add script to enforce page heights
+        await page.addScriptTag({
+          content: `
+            function enforceA4Heights() {
+              const pageBreaks = document.querySelectorAll('.page-break');
+              pageBreaks.forEach(page => {
+                page.style.height = '1123px';
+                page.style.overflow = 'hidden';
+              });
+            }
+            window.addEventListener('load', enforceA4Heights);
+            enforceA4Heights();
           `
         });
       }
@@ -165,17 +201,12 @@ export class ReactPDFConverter {
         await page.pdf({
           path: outputPath,
           format: 'A4',
-          margin: {
-            top: this.options.margin,
-            right: this.options.margin,
-            bottom: this.options.margin,
-            left: this.options.margin
-          },
+          margin: 0,
           printBackground: true,
           preferCSSPageSize: true,
           displayHeaderFooter: false,
           scale: 1.0,
-          pageRanges: '-', // Print all pages
+          pageRanges: '-',
         });
       }
 
