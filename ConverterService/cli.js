@@ -80,13 +80,21 @@ yargs(hideBin(process.argv))
           console.log(`Note: Output will be saved to the output/ directory: ${path.join('output', outputPath)}`);
         }
         
-        await convertTsxToPdf(argv.files, outputPath, {
-          width: argv.width,
+        // Prepare options for the converter, conditionally excluding width/autoSize for A4
+        const converterOptions = {
           format: argv.format,
           margin: argv.margin,
-          autoSize: argv['auto-size'],
           debugMode: argv.debug,
-        });
+        };
+
+        if (argv.format !== 'a4') {
+          converterOptions.width = argv.width;
+          converterOptions.autoSize = argv['auto-size'];
+        } 
+        // No else needed: If format is 'a4', width and autoSize are intentionally omitted
+        // The ReactPDFConverter class will handle 'a4' based on the format option alone.
+
+        await convertTsxToPdf(argv.files, outputPath, converterOptions);
       } catch (err) {
         console.error('Error:', err);
         process.exit(1);

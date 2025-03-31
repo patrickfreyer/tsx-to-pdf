@@ -285,6 +285,48 @@ async function findChromePath() {
   return null;
 }
 
+// --- ADDED: Default Print CSS ---
+const defaultPrintCSS = `
+  @media print {
+    html, body {
+      /* Ensure browser uses print settings, not screen */
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      margin: 0 !important; /* Control margins via puppeteer options */
+    }
+    img, svg, video, canvas, iframe {
+      max-width: 100% !important;
+      height: auto !important;
+      page-break-inside: avoid !important;
+    }
+    /* Attempt to keep common block elements together */
+    figure, pre, blockquote, table, thead, tfoot, tr, th, td {
+       page-break-inside: avoid !important;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      page-break-after: avoid !important;
+      page-break-inside: avoid !important;
+    }
+    ul, ol {
+      page-break-inside: avoid !important;
+    }
+    /* Hide elements marked specifically for no-print */
+    .no-print {
+      display: none !important;
+    }
+    /* Page break helper classes */
+    .page-break-before { page-break-before: always !important; }
+    .page-break-after { page-break-after: always !important; }
+    .page-break-inside-avoid { page-break-inside: avoid !important; }
+  }
+  /* General layout helpers (apply outside print media query too) */
+  body { box-sizing: border-box; }
+  * { box-sizing: inherit; }
+`;
+// --- END ADDED CSS ---
+
 /**
  * Converts TSX files to a single PDF document
  * 
@@ -293,12 +335,54 @@ async function findChromePath() {
  * @param {ConversionOptions} options - Configuration options
  */
 async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
-  // Debug: Log the raw options object
+  console.log('Starting conversion of...');
+  console.log('TSX files:', Array.isArray(tsxPaths) ? tsxPaths.join(', ') : tsxPaths);
+  console.log('Output path:', outputPath);
+  // Debug log for raw options object
   console.log('Raw options object:', options);
   console.log('Options type:', typeof options);
-  console.log('Width type:', typeof options.width);
-  console.log('Width value:', options.width);
+
+  const defaultOptions = {
+    width: 390, // Default width if not specified and not A4
+    widthPreset: null,
+    margin: 0,
+    format: 'auto', // Default format
+    autoSize: true,
+    debugMode: false,
+    // ... add other defaults as needed
+  };
+
+  const mergedOptions = { ...defaultOptions, ...options };
+
+  // Debug log width type and value from merged options
+  console.log('Width type:', typeof mergedOptions.width);
+  console.log('Width value:', mergedOptions.width);
+
+  console.log('Options received:', mergedOptions);
   
+  // ----- MODIFIED WIDTH LOGIC ----- 
+  let finalWidth = null; // Start with null width
+  
+  // Only determine width if format is NOT 'a4'
+  if (mergedOptions.format !== 'a4') {
+    finalWidth = mergedOptions.width; // Use provided width or default from mergedOptions
+    if (mergedOptions.widthPreset) {
+      const presets = {
+        'iPhone': 390,
+        'iPad': 768,
+        'MacBook': 1440,
+        // Remove A4 presets here, as format handles it
+      };
+      finalWidth = presets[mergedOptions.widthPreset] || finalWidth;
+    }
+    console.log(`Format is not 'a4'. Using calculated width: ${finalWidth}, Preset: ${mergedOptions.widthPreset || 'None'}`);
+  } else {
+    console.log(`Format is 'a4'. Width will be determined by A4 standard.`);
+    // Ensure autoSize is false for A4, as it conflicts with fixed page size
+    mergedOptions.autoSize = false; 
+  }
+  // ----- END MODIFIED WIDTH LOGIC ----- 
+
   // Ensure tsxPaths is an array
   const tsxPathsArray = Array.isArray(tsxPaths) ? tsxPaths : [tsxPaths];
   
@@ -309,20 +393,21 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
   }
   
   // Parse options and ensure width is a number
-  const widthValue = options.width !== undefined ? parseInt(options.width, 10) : 390;
+  const widthValue = finalWidth !== undefined ? parseInt(finalWidth, 10) : 390;
   
   const {
     width = widthValue, // Use parsed width or default to iPhone width
     widthPreset = 'iPhone',
     margin = 0,
+    format, // Destructure format here
     autoSize = true,
     debugMode = false
-  } = options;
+  } = mergedOptions;
 
   console.log(`Starting conversion of ${tsxPathsArray.length} TSX files to PDF...`);
   console.log(`TSX files: ${tsxPathsArray.join(', ')}`);
   console.log(`Output path: ${finalOutputPath}`);
-  console.log(`Options received: ${JSON.stringify(options, null, 2)}`);
+  console.log(`Options received: ${JSON.stringify(mergedOptions, null, 2)}`);
   console.log(`Parsed width: ${widthValue}, Final width: ${width}, Width preset: ${widthPreset}`);
   
   // Set debug mode environment variable
@@ -385,20 +470,18 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
     const page = await browser.newPage();
     console.log('Browser launched successfully');
 
-    // Calculate dimensions based on width
-    // We'll use a dynamic height that fits the content
-    let viewportWidth = parseInt(width, 10); // Ensure width is a number
-    if (isNaN(viewportWidth) || viewportWidth <= 0) {
-      console.warn(`Invalid width value: ${width}, using default of 390`);
-      viewportWidth = 390; // Default to iPhone width if invalid
-    }
-    
-    let viewportHeight = Math.round(viewportWidth * 1.5); // Default height ratio of 1.5x width
+    // --- MODIFIED: Set Viewport Correctly for A4 ---
+    const A4_WIDTH_PX = 794; // Approx 210mm @ 96 DPI
+    const A4_HEIGHT_PX = 1123; // Approx 297mm @ 96 DPI
+
+    const viewportWidth = format === 'a4' ? A4_WIDTH_PX : widthValue;
+    const viewportHeight = format === 'a4' ? A4_HEIGHT_PX : (await page.evaluate(() => window.innerHeight)); // Use A4 height or default
     
     console.log(`Setting initial viewport to ${viewportWidth}x${viewportHeight}`);
     
-    // Set viewport to match desired width
+    // Set viewport to match desired width/height
     await page.setViewport({ width: viewportWidth, height: viewportHeight });
+    // --- END MODIFIED VIEWPORT ---
 
     const tempPdfPaths = [];
 
@@ -429,7 +512,7 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
           await new Promise(resolve => setTimeout(resolve, 1000));
           
           // Generate PDF
-          if (autoSize) {
+          if (autoSize && format !== 'a4') { // Ensure autoSize logic doesn't run for A4
             try {
               // First, ensure we scroll through the entire page to load all content
               await page.evaluate(async () => {
@@ -574,20 +657,50 @@ async function convertTsxToPdf(tsxPaths, outputPath, options = {}) {
               });
             }
           } else {
-            // Use fixed dimensions based on viewport
-            console.log(`Using fixed dimensions for PDF: ${viewportWidth}x${viewportHeight}`);
-            await page.pdf({
-              path: tempPdfPath,
-              width: `${viewportWidth}px`,
-              height: `${viewportHeight}px`,
-              margin: {
-                top: `${margin}px`,
-                right: `${margin}px`,
-                bottom: `${margin}px`,
-                left: `${margin}px`,
-              },
-              printBackground: true,
-            });
+            // Use fixed dimensions (for non-autoSize formats) OR A4 format
+            if (format === 'a4') {
+              console.log(`Using A4 format for PDF generation.`);
+              
+              // --- ADDED: Inject Print CSS for A4 ---
+              console.log('Injecting print CSS for A4 format...');
+              await page.addStyleTag({ content: defaultPrintCSS });
+              // --- END ADDED CSS INJECTION ---
+              
+              // Convert margin from px to mm for Puppeteer's A4 format option
+              const marginMmValue = (margin / 96 * 25.4).toFixed(1); // Approx @ 96 DPI
+              const marginMm = `${marginMmValue}mm`;
+
+              // --- MODIFIED: Use page.pdf() with A4 format ---
+              await page.pdf({
+                path: tempPdfPath,
+                format: 'A4',
+                margin: {
+                  top: marginMm,
+                  right: marginMm,
+                  bottom: marginMm,
+                  left: marginMm
+                },
+                printBackground: true,
+                preferCSSPageSize: false // Prioritize 'format' over @page size CSS
+              });
+              // --- END MODIFIED page.pdf() for A4 ---
+
+            } else {
+              // Existing logic for non-A4, fixed size export
+              console.log(`Using fixed dimensions for PDF: ${viewportWidth}x${viewportHeight}`);
+              await page.pdf({
+                path: tempPdfPath,
+                width: `${viewportWidth}px`,
+                height: `${viewportHeight}px`,
+                margin: {
+                  top: `${margin}px`,
+                  right: `${margin}px`,
+                  bottom: `${margin}px`,
+                  left: `${margin}px`,
+                },
+                printBackground: true,
+              });
+            }
           }
           
           console.log(`PDF generated: ${tempPdfPath}`);
