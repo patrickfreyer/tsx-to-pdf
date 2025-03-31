@@ -160,7 +160,7 @@ const SynthoratedFlyer = () => {
             Rather than letting this valuable technology collect dust, I'm looking to connect with ambitious founders who can focus on distribution and scaling.
           </p>
           <div className="inline-block bg-pink-500/40 px-6 py-3 rounded-lg text-white font-medium">
-            Reach out to mail@patrickfreyer.com for Demo & Details
+            Contact Patrick Freyer for Demo & Details
           </div>
         </div>
         

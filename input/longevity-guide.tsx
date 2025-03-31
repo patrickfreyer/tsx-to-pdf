@@ -3,21 +3,21 @@ import { Leaf, Battery, Clock, Droplets } from 'lucide-react';
 
 const LongevityNutritionGuide = () => {
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-emerald-900 to-teal-900">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-900 to-slate-800">
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
-        <div className="p-5 rounded-lg bg-emerald-800/40 backdrop-blur-sm border border-emerald-600/30 text-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-300 to-teal-200 bg-clip-text text-transparent">The Longevity Nutrition Guide</h1>
-          <p className="text-teal-200 italic mt-2">"Eating Today for a Healthier You Tomorrow"</p>
+        <div className="p-5 rounded-lg bg-slate-800/40 backdrop-blur-sm border border-slate-600/30 text-center">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-300 to-teal-200 bg-clip-text text-transparent">The Longevity Nutrition Guide</h1>
+          <p className="text-blue-200 italic mt-2">"Eating Today for a Healthier You Tomorrow"</p>
         </div>
 
         {/* The 4P Framework */}
-        <div className="p-5 rounded-lg bg-emerald-800/40 backdrop-blur-sm border border-emerald-600/30">
+        <div className="p-5 rounded-lg bg-slate-800/40 backdrop-blur-sm border border-slate-600/30">
           <div className="flex items-center gap-3 mb-4">
-            <div className="bg-emerald-400/20 p-2 rounded-full">
-              <Leaf size={20} className="text-emerald-300" />
+            <div className="bg-teal-400/20 p-2 rounded-full">
+              <Leaf size={20} className="text-teal-300" />
             </div>
-            <h2 className="text-lg font-bold text-emerald-100">The 4P Longevity Plate</h2>
+            <h2 className="text-lg font-bold text-teal-100">The 4P Longevity Plate</h2>
           </div>
           
           <div className="grid grid-cols-2 gap-3 mb-4">
@@ -176,10 +176,10 @@ const LongevityNutritionGuide = () => {
         </div>
 
         {/* Footer */}
-        <div className="p-5 rounded-lg bg-cyan-900/40 backdrop-blur-sm border border-cyan-600/30 text-center">
-          <h2 className="text-lg font-bold bg-gradient-to-r from-teal-300 to-cyan-200 bg-clip-text text-transparent mb-3">"Eat Today for the You in 50 Years"</h2>
-          <p className="text-cyan-100 text-sm mb-4">Your future health starts with what you put on your plate right now.</p>
-          <p className="text-xs text-teal-200">Personal insights from Patrick Freyer • Not medical advice</p>
+        <div className="p-5 rounded-lg bg-slate-800/40 backdrop-blur-sm border border-slate-600/30 text-center">
+          <h2 className="text-lg font-bold bg-gradient-to-r from-blue-300 to-teal-200 bg-clip-text text-transparent mb-3">"Eat Today for the You in 50 Years"</h2>
+          <p className="text-blue-100 text-sm mb-4">Your future health starts with what you put on your plate right now.</p>
+          <p className="text-xs text-slate-300">Personal insights from Patrick Freyer • Not medical advice</p>
         </div>
       </div>
     </div>
