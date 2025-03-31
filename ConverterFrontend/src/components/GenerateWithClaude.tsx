@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
+import { GenerateWithClaudeProps } from '../types';
 
-interface GenerateWithClaudeProps {
-  onComponentGenerated: (componentName: string, tsxCode: string) => void;
-  apiUrl: string;
-}
 
 const GenerateWithClaude: React.FC<GenerateWithClaudeProps> = ({ onComponentGenerated, apiUrl }) => {
   const [prompt, setPrompt] = useState<string>('');

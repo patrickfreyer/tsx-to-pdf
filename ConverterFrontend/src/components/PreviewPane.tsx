@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-interface Component {
-  file: string;
-  componentName: string;
-  routeName: string;
-}
-
-interface PreviewPaneProps {
-  selectedComponents: Component[];
-}
+import { PreviewPaneProps, Component } from '../types';
 
 const PreviewPane: React.FC<PreviewPaneProps> = ({ selectedComponents }) => {
   const [activeTab, setActiveTab] = useState<string>('');

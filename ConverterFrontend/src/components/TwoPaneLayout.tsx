@@ -2,26 +2,9 @@ import React, { useState, useEffect } from 'react';
 import PreviewPane from './PreviewPane';
 import ConfigurationPane from './ConfigurationPane';
 import GenerateWithClaude from './GenerateWithClaude';
+import { Component, OutputFile, ExportOptions } from '../types';
 
-interface Component {
-  file: string;
-  componentName: string;
-  routeName: string;
-}
 
-interface OutputFile {
-  file: string;
-  size: string;
-  createdAt: string;
-}
-
-interface ExportOptions {
-  width: number;
-  widthPreset: string;
-  margin: number;
-  format: 'auto' | 'a4';
-  debug: boolean;
-}
 
 // Dynamically determine the API URL and base URL based on the current environment
 const API_URL = window.location.hostname === 'localhost' 

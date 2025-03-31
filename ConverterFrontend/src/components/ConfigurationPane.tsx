@@ -1,24 +1,5 @@
 import React, { useState } from 'react';
-
-interface Component {
-  file: string;
-  componentName: string;
-  routeName: string;
-}
-
-interface OutputFile {
-  file: string;
-  size: string;
-  createdAt: string;
-}
-
-interface ExportOptions {
-  width: number;
-  widthPreset: string;
-  margin: number;
-  format: 'auto' | 'a4';
-  debug: boolean;
-}
+import { Component, OutputFile, ExportOptions } from '../types';
 
 interface ConfigurationPaneProps {
   components: Component[];
