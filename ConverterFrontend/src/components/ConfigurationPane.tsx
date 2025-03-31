@@ -138,31 +138,6 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
     <div className="h-full flex flex-col flex-grow text-gray-200">
       <h2 className="text-xl font-semibold mb-4 text-blue-300">Export Configuration</h2>
       
-      {/* File Upload Section */}
-      <div className="mb-6 p-4 bg-black/20 rounded-xl border border-white/10">
-        <h2 className="text-lg font-semibold mb-4 text-blue-300">Upload New TSX File</h2>
-        <div className="flex flex-col space-y-4">
-          <label className="flex flex-col items-center px-4 py-6 bg-black/30 text-blue-400 rounded-lg border border-blue-500/50 border-dashed cursor-pointer hover:bg-black/40 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            <span className="mt-2 text-base">Select a TSX file to upload</span>
-            <input 
-              type="file" 
-              className="hidden" 
-              accept=".tsx" 
-              onChange={onFileUpload}
-              disabled={isUploading}
-            />
-          </label>
-          {uploadStatus && (
-            <div className={`text-center p-2 rounded-lg ${uploadStatus.includes('Error') ? 'bg-red-900/50 text-red-300' : 'bg-green-900/50 text-green-300'}`}>
-              {uploadStatus}
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Export Options Section */}
       <div className="mb-6 p-4 bg-black/20 rounded-xl border border-white/10">
         <h3 className="text-lg font-semibold mb-4 text-blue-300">Export Options</h3>
@@ -310,8 +285,33 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
           </div>
         </div>
         
-        {components.length > 0 ? (
-          <div className="bg-black/30 border border-white/20 rounded-lg overflow-hidden">
+        <div className="bg-black/30 border border-white/20 rounded-lg overflow-hidden">
+          {/* Upload Section */}
+          <label className="block cursor-pointer hover:bg-black/20 border-b border-white/10">
+            <div className="flex items-center justify-center p-4 text-blue-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <span className="text-sm font-medium">
+                {isUploading ? 'Uploading...' : 'Upload TSX File'}
+              </span>
+              <input 
+                type="file" 
+                className="hidden" 
+                accept=".tsx" 
+                onChange={onFileUpload}
+                disabled={isUploading}
+              />
+            </div>
+            {uploadStatus && (
+              <div className={`px-4 py-2 text-sm ${uploadStatus.includes('Error') ? 'bg-red-900/50 text-red-300' : 'bg-green-900/50 text-green-300'}`}>
+                {uploadStatus}
+              </div>
+            )}
+          </label>
+
+          {/* Components List */}
+          {components.length > 0 ? (
             <ul className="divide-y divide-white/10">
               {components.map((component) => (
                 <li 
@@ -386,13 +386,13 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
                 </li>
               ))}
             </ul>
-          </div>
-        ) : (
-          <div className="bg-black/30 border border-white/20 rounded-lg p-4 text-center text-gray-400">
-            No components available. Upload TSX files to get started.
-          </div>
-        )}
-        <p className="mt-1 text-sm text-gray-400">Click on a component to select/deselect it for export</p>
+          ) : (
+            <div className="bg-black/30 border border-white/20 rounded-lg p-4 text-center text-gray-400">
+              No components available. Upload TSX files to get started.
+            </div>
+          )}
+          <p className="mt-1 text-sm text-gray-400">Click on a component to select/deselect it for export</p>
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}

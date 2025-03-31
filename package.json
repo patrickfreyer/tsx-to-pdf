@@ -15,8 +15,7 @@
     "start-ui": "npm run build-frontend && npm run start-server",
     "start-dev-server": "cd RenderingServer && npm install && npm run dev",
     "dev": "node watch-and-build.js",
-    "postinstall": "npx puppeteer browsers install chrome",
-    "check-puppeteer": "node check-puppeteer.js"
+    "postinstall": "npx puppeteer browsers install chrome"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.18.0",
