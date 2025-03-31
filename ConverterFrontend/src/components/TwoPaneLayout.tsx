@@ -19,7 +19,7 @@ interface ExportOptions {
   width: number;
   widthPreset: string;
   margin: number;
-  autoSize: boolean;
+  format: 'auto' | 'a4';
   debug: boolean;
 }
 

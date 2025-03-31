@@ -16,11 +16,16 @@ import { PDFDocument } from 'pdf-lib';
  */
 export class ReactPDFConverter {
   constructor(options = {}) {
+    // A4 dimensions in pixels at 96 DPI
+    const A4_WIDTH = 794; // 210mm
+    const A4_HEIGHT = 1123; // 297mm
+
     this.options = {
       port: options.port || 3333,
-      width: options.width || 800,
-      height: options.height || 1200,
+      width: options.width || A4_WIDTH,
+      height: options.height || A4_HEIGHT,
       margin: options.margin || 40,
+      format: options.format || 'auto', // 'auto' or 'a4'
       ...options
     };
     
@@ -73,14 +78,55 @@ export class ReactPDFConverter {
     try {
       // Create new page
       page = await this.browser.newPage();
+      
+      // Set initial viewport
       await page.setViewport({
-        width: this.options.width,
-        height: this.options.height
+        width: this.options.format === 'a4' ? 794 : this.options.width, // A4 width for a4 format
+        height: this.options.format === 'a4' ? 1123 : this.options.height // A4 height for a4 format
       });
 
       // Load the component
       const url = `http://localhost:${this.options.port}`;
       await page.goto(url, { waitUntil: 'networkidle0' });
+
+      // Add necessary CSS for A4 format
+      if (this.options.format === 'a4') {
+        await page.addStyleTag({
+          content: `
+            @page {
+              size: A4;
+              margin: ${this.options.margin}px;
+            }
+            body {
+              margin: 0;
+              padding: 0;
+            }
+            #root {
+              width: 794px !important;
+              margin: 0 auto !important;
+              background-color: white;
+            }
+            /* Add page break hints for common elements */
+            h1, h2, h3 {
+              break-after: avoid;
+            }
+            img, table {
+              break-inside: avoid;
+            }
+            ul, ol {
+              break-before: avoid;
+            }
+            /* Force page breaks for elements with class */
+            .page-break {
+              break-after: page;
+            }
+            /* Prevent unwanted breaks */
+            .no-break {
+              break-inside: avoid;
+            }
+          `
+        });
+      }
 
       // Inject the component
       await page.evaluate(async (componentPath) => {
@@ -94,19 +140,44 @@ export class ReactPDFConverter {
       // Wait for rendering
       await page.waitForSelector('#root > *');
 
-      // Generate PDF
-      await page.pdf({
-        path: outputPath,
-        width: this.options.width,
-        height: this.options.height,
-        margin: {
-          top: this.options.margin,
-          right: this.options.margin,
-          bottom: this.options.margin,
-          left: this.options.margin
-        },
-        printBackground: true
-      });
+      if (this.options.format === 'auto') {
+        // For auto format, measure content height
+        const contentHeight = await page.evaluate(() => {
+          const root = document.getElementById('root');
+          return root ? root.scrollHeight : 0;
+        });
+
+        // Generate PDF with auto height
+        await page.pdf({
+          path: outputPath,
+          width: this.options.width,
+          height: contentHeight + (this.options.margin * 2),
+          margin: {
+            top: this.options.margin,
+            right: this.options.margin,
+            bottom: this.options.margin,
+            left: this.options.margin
+          },
+          printBackground: true
+        });
+      } else if (this.options.format === 'a4') {
+        // For A4 format, use standard dimensions and let content flow across pages
+        await page.pdf({
+          path: outputPath,
+          format: 'A4',
+          margin: {
+            top: this.options.margin,
+            right: this.options.margin,
+            bottom: this.options.margin,
+            left: this.options.margin
+          },
+          printBackground: true,
+          preferCSSPageSize: true,
+          displayHeaderFooter: false,
+          scale: 1.0,
+          pageRanges: '-', // Print all pages
+        });
+      }
 
       return outputPath;
     } catch (error) {

@@ -16,7 +16,7 @@ interface ExportOptions {
   width: number;
   widthPreset: string;
   margin: number;
-  autoSize: boolean;
+  format: 'auto' | 'a4';
   debug: boolean;
 }
 
@@ -61,7 +61,7 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
     width: 390, // iPhone width
     widthPreset: 'iPhone',
     margin: 0,
-    autoSize: true,
+    format: 'auto',
     debug: false,
   });
   const [componentToDelete, setComponentToDelete] = useState<string | null>(null);
@@ -179,6 +179,121 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
               {uploadStatus}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Export Options Section */}
+      <div className="mb-6 p-4 bg-black/20 rounded-xl border border-white/10">
+        <h3 className="text-lg font-semibold mb-4 text-blue-300">Export Options</h3>
+        
+        {/* Format Selection */}
+        <div className="mb-4">
+          <label className="block text-gray-300 font-medium mb-2">Format</label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              className={`p-3 rounded-lg border ${
+                options.format === 'auto'
+                  ? 'bg-blue-600/30 border-blue-500/50 text-blue-300'
+                  : 'bg-black/30 border-white/20 text-gray-300 hover:bg-black/40'
+              }`}
+              onClick={() => setOptions({ ...options, format: 'auto' })}
+            >
+              <div className="flex flex-col items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+                <span>Auto Height</span>
+                <span className="text-xs opacity-70 mt-1">Adjusts to content</span>
+              </div>
+            </button>
+            <button
+              className={`p-3 rounded-lg border ${
+                options.format === 'a4'
+                  ? 'bg-blue-600/30 border-blue-500/50 text-blue-300'
+                  : 'bg-black/30 border-white/20 text-gray-300 hover:bg-black/40'
+              }`}
+              onClick={() => setOptions({ ...options, format: 'a4' })}
+            >
+              <div className="flex flex-col items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2z M16 3v7M8 3v7M3 8h18" />
+                </svg>
+                <span>A4 Pages</span>
+                <span className="text-xs opacity-70 mt-1">Split into pages</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Width Selection - Only show if format is 'auto' */}
+        {options.format === 'auto' && (
+          <div className="mb-4">
+            <label className="block text-gray-300 font-medium mb-2">Width Preset</label>
+            <select
+              value={options.widthPreset}
+              onChange={(e) => {
+                const width = {
+                  iPhone: 390,
+                  iPad: 820,
+                  Desktop: 1200,
+                  Custom: options.width,
+                }[e.target.value] || options.width;
+                
+                setOptions({
+                  ...options,
+                  widthPreset: e.target.value,
+                  width,
+                });
+              }}
+              className="w-full p-2 bg-black/30 border border-white/20 rounded-lg text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="iPhone">iPhone (390px)</option>
+              <option value="iPad">iPad (820px)</option>
+              <option value="Desktop">Desktop (1200px)</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+        )}
+
+        {/* Custom Width Input - Only show if format is 'auto' and widthPreset is 'Custom' */}
+        {options.format === 'auto' && options.widthPreset === 'Custom' && (
+          <div className="mb-4">
+            <label className="block text-gray-300 font-medium mb-2">Custom Width (px)</label>
+            <input
+              type="number"
+              value={options.width}
+              onChange={(e) => setOptions({ ...options, width: parseInt(e.target.value) || 0 })}
+              className="w-full p-2 bg-black/30 border border-white/20 rounded-lg text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              min="100"
+              max="2000"
+            />
+          </div>
+        )}
+
+        {/* Margin Input */}
+        <div className="mb-4">
+          <label className="block text-gray-300 font-medium mb-2">Margin (px)</label>
+          <input
+            type="number"
+            value={options.margin}
+            onChange={(e) => setOptions({ ...options, margin: parseInt(e.target.value) || 0 })}
+            className="w-full p-2 bg-black/30 border border-white/20 rounded-lg text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            min="0"
+            max="100"
+          />
+        </div>
+
+        {/* Debug Mode Toggle */}
+        <div className="mb-4">
+          <label className="flex items-center space-x-2 text-gray-300">
+            <input
+              type="checkbox"
+              checked={options.debug}
+              onChange={(e) => setOptions({ ...options, debug: e.target.checked })}
+              className="h-4 w-4 bg-black/30 border-white/20 text-blue-500 focus:ring-blue-500 focus:ring-offset-0 rounded"
+            />
+            <span>Debug Mode</span>
+          </label>
         </div>
       </div>
 
@@ -395,140 +510,40 @@ const ConfigurationPane: React.FC<ConfigurationPaneProps> = ({
         </div>
       )}
 
-      <div className="mb-6">
-        <label className="block text-gray-300 font-semibold mb-2">Output File Name</label>
-        <input
-          type="text"
-          className="w-full p-2 bg-black/30 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-          value={outputFileName}
-          onChange={(e) => setOutputFileName(e.target.value)}
-          placeholder="output.pdf"
-          disabled={isLoading}
-        />
-      </div>
-      
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-gray-300 font-semibold mb-2">Width</label>
-          <input
-            type="number"
-            className="w-full p-2 bg-black/30 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-            value={options.width}
-            onChange={(e) => {
-              const numericValue = parseInt(e.target.value, 10);
-              setOptions({
-                ...options, 
-                width: isNaN(numericValue) ? 0 : numericValue,
-                widthPreset: 'custom' // Switch to custom preset when manually changing width
-              });
-            }}
-            min="0"
-            disabled={isLoading}
-          />
-        </div>
-        
-        <div>
-          <label className="block text-gray-300 font-semibold mb-2">Width Preset</label>
-          <select
-            className="w-full p-2 bg-black/30 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-            value={options.widthPreset}
-            onChange={(e) => {
-              const preset = e.target.value;
-              let width = options.width;
-              
-              // Set width based on preset
-              switch(preset) {
-                case 'iPhone':
-                  width = 390; // iPhone 12/13/14 width in points
-                  break;
-                case 'A4':
-                  width = 794; // A4 width in points (72dpi)
-                  break;
-                case 'MacBook':
-                  width = 1440; // MacBook Pro 14" width
-                  break;
-                case 'custom':
-                  // Keep current width
-                  break;
-              }
-              
-              setOptions({...options, widthPreset: preset, width});
-            }}
-            disabled={isLoading}
-          >
-            <option value="iPhone">iPhone</option>
-            <option value="A4">A4</option>
-            <option value="MacBook">MacBook</option>
-            <option value="custom">Custom</option>
-          </select>
-        </div>
-        
-        <div>
-          <label className="block text-gray-300 font-semibold mb-2">Margin (px)</label>
-          <input
-            type="number"
-            className="w-full p-2 bg-black/30 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-            value={options.margin}
-            onChange={(e) => setOptions({...options, margin: parseInt(e.target.value) || 0})}
-            min="0"
-            disabled={isLoading}
-          />
+      {/* Export Button and Status */}
+      <div className="mt-auto p-4 bg-black/20 rounded-xl border border-white/10">
+        <div className="flex flex-col space-y-4">
+          <div className="flex items-center space-x-4">
+            <input
+              type="text"
+              value={outputFileName}
+              onChange={(e) => setOutputFileName(e.target.value)}
+              placeholder="output.pdf"
+              className="flex-1 p-2 bg-black/30 border border-white/20 rounded-lg text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <button
+              onClick={handleExport}
+              disabled={isLoading || selectedComponents.length === 0}
+              className={`px-6 py-2 rounded-lg font-medium ${
+                isLoading || selectedComponents.length === 0
+                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-500'
+              }`}
+            >
+              {isLoading ? 'Exporting...' : 'Export'}
+            </button>
+          </div>
+          {exportMessage && (
+            <div className={`p-3 rounded-lg ${
+              exportMessage.includes('failed') || exportMessage.includes('Error')
+                ? 'bg-red-900/50 text-red-300'
+                : 'bg-green-900/50 text-green-300'
+            }`}>
+              {exportMessage}
+            </div>
+          )}
         </div>
       </div>
-      
-      <div className="mb-6 flex flex-wrap gap-4">
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="autoSize"
-            className="mr-2 h-4 w-4 bg-black/30 border-white/20 text-blue-500 focus:ring-blue-500 focus:ring-offset-0 rounded"
-            checked={options.autoSize}
-            onChange={(e) => setOptions({...options, autoSize: e.target.checked})}
-            disabled={isLoading}
-          />
-          <label htmlFor="autoSize" className="text-gray-300">Auto-size PDF to content</label>
-        </div>
-        
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="debug"
-            className="mr-2 h-4 w-4 bg-black/30 border-white/20 text-blue-500 focus:ring-blue-500 focus:ring-offset-0 rounded"
-            checked={options.debug}
-            onChange={(e) => setOptions({...options, debug: e.target.checked})}
-            disabled={isLoading}
-          />
-          <label htmlFor="debug" className="text-gray-300">Debug mode (keep temp files)</label>
-        </div>
-      </div>
-      
-      <div className="flex justify-center">
-        <button
-          className={`px-6 py-2.5 rounded-lg font-medium text-white transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 ${
-            isLoading || selectedComponents.length === 0
-              ? 'bg-blue-600/50 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-blue-600/30'
-          }`}
-          onClick={handleExport}
-          disabled={isLoading || selectedComponents.length === 0}
-        >
-          {isLoading ? (
-            <span className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Exporting...
-            </span>
-          ) : 'Export to PDF'}
-        </button>
-      </div>
-      
-      {exportMessage && (
-        <div className={`mt-4 p-3 rounded-lg ${exportMessage.includes('successful') ? 'bg-green-900/50 text-green-300' : 'bg-yellow-900/50 text-yellow-300'}`}>
-          {exportMessage}
-        </div>
-      )}
     </div>
   );
 };
