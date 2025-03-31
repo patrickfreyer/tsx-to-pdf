@@ -32,11 +32,5 @@ This document outlines the step-by-step process of converting TSX files to PDF u
     *   **Merging:** If multiple input files, merges temporary PDFs using `pdf-lib`.
     *   **Cleanup:** Closes browser, removes temp files.
 
-5.  **`ConverterService/react-pdf-converter.js` (Likely Unused in CLI Flow)**
-    *   Defines a `ReactPDFConverter` class containing similar Puppeteer logic.
-    *   This class appears **inactive** when the conversion is triggered via `cli.js`. The primary logic resides in `index.js`.
-
-6.  **Final Output**
+5.  **Final Output**
     *   The final PDF (e.g., `output/MyFile.pdf`) is saved.
-
-**Key Insight:** The core PDF generation logic executed by the CLI resides in `ConverterService/index.js`. Issues with A4 formatting stem from this file's handling of viewport settings and its `page.pdf()` call, not from `ConverterService/react-pdf-converter.js`. 

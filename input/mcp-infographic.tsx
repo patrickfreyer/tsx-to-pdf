@@ -29,7 +29,7 @@ const MCPExplanation = () => {
   return (
     <div className={containerStyle}>
       {/* Title Section - Page 1 */}
-      <div className="page-break">
+      <div >
         <div className="mb-8 text-center">
           <h1 className={titleStyle + " text-4xl"}>AI MCP Cheatsheet</h1>
         </div>
@@ -38,7 +38,7 @@ const MCPExplanation = () => {
         <div className={sectionStyle}>
           <h2 className={sectionTitleStyle}><Zap size={20} className="text-indigo-600" /> What is MCP?</h2>
           <div className="grid md:grid-cols-2 gap-5">
-            <div className={cardStyle + " no-break"}>
+            <div className={cardStyle + " page-break-inside-avoid"}>
               <h3 className="font-semibold text-gray-800 mb-2">The Problem</h3>
               <p className={bodyTextStyle}>AI models like ChatGPT are trained on vast data but lack direct access to:</p>
               <ul className="space-y-2 mt-3">
@@ -62,7 +62,7 @@ const MCPExplanation = () => {
                 </li>
               </ul>
             </div>
-            <div className={cardStyle + " no-break"}>
+            <div className={cardStyle + " page-break-inside-avoid"}>
               <h3 className="font-semibold text-gray-800 mb-2">MCP Solution</h3>
               <p className={bodyTextStyle}>MCP is like <span className={accentTextStyle}>USB-C for AI models</span> - a standardized interface that:</p>
               <ul className="space-y-2 mt-3">
@@ -91,8 +91,8 @@ const MCPExplanation = () => {
       </div>
 
       {/* Core Components Section - Page 2 */}
-      <div className="page-break">
-        <div className={sectionStyle + " no-break"}>
+      <div className="page-break-before">
+        <div className={sectionStyle + " page-break-inside-avoid"}>
           <h2 className={sectionTitleStyle}><Cpu size={20} className="text-indigo-600" /> MCP Core Components</h2>
           
           {/* Simplified, More Intuitive Diagram */}
@@ -196,9 +196,9 @@ const MCPExplanation = () => {
       </div>
 
       {/* Component Descriptions - Page 3 */}
-      <div className="page-break">
+      <div className="page-break-before">
         <div className="grid md:grid-cols-4 gap-4">
-          <div className={cardStyle + " relative no-break"}>
+          <div className={cardStyle + " relative page-break-inside-avoid"}>
             <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold">1</div>
             <h3 className="font-semibold text-violet-900 mb-2">MCP Host (AI Model)</h3>
             <ul className="space-y-2">
@@ -210,7 +210,7 @@ const MCPExplanation = () => {
             <p className={noteStyle}>Example: Claude, ChatGPT</p>
           </div>
           
-          <div className={cardStyle + " relative no-break"}>
+          <div className={cardStyle + " relative page-break-inside-avoid"}>
             <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">2</div>
             <h3 className="font-semibold text-blue-900 mb-2">MCP Client (Middleware)</h3>
             <ul className="space-y-2">
@@ -222,7 +222,7 @@ const MCPExplanation = () => {
             <p className={noteStyle}>Tech: Node.js, Python, Go SDKs</p>
           </div>
           
-          <div className={cardStyle + " relative no-break"}>
+          <div className={cardStyle + " relative page-break-inside-avoid"}>
             <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold">3</div>
             <h3 className="font-semibold text-emerald-900 mb-2">MCP Server (Tool Provider)</h3>
             <ul className="space-y-2">
@@ -234,7 +234,7 @@ const MCPExplanation = () => {
             <p className={noteStyle}>Tech: FastAPI, Express.js, etc.</p>
           </div>
           
-          <div className={cardStyle + " relative no-break"}>
+          <div className={cardStyle + " relative page-break-inside-avoid"}>
             <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center text-white font-bold">4</div>
             <h3 className="font-semibold text-amber-900 mb-2">External Tools & APIs</h3>
             <ul className="space-y-2">
@@ -249,13 +249,13 @@ const MCPExplanation = () => {
       </div>
 
       {/* How It Works Section - Page 4 */}
-      <div className="page-break">
+      <div className="page-break-before">
         <div className={sectionStyle}>
           <h2 className={sectionTitleStyle}><Zap size={20} className="text-indigo-600" /> How MCP Works: End-to-End Flow</h2>
           
           <div className="space-y-5">
             {/* Step 1 */}
-            <div className="flex gap-4 items-start no-break">
+            <div className="flex gap-4 items-start page-break-inside-avoid">
               <div className="flex-shrink-0 mt-1">
                 <Circle bgColor="bg-indigo-50" size="w-8 h-8">
                   <span className="text-indigo-600 font-bold">1</span>
@@ -274,7 +274,7 @@ const MCPExplanation = () => {
             </div>
             
             {/* Step 2 */}
-            <div className="flex gap-4 items-start no-break">
+            <div className="flex gap-4 items-start page-break-inside-avoid">
               <div className="flex-shrink-0 mt-1">
                 <Circle bgColor="bg-indigo-50" size="w-8 h-8">
                   <span className="text-indigo-600 font-bold">2</span>
@@ -304,7 +304,7 @@ const MCPExplanation = () => {
             </div>
             
             {/* Step 3 */}
-            <div className="flex gap-4 items-start no-break">
+            <div className="flex gap-4 items-start page-break-inside-avoid">
               <div className="flex-shrink-0 mt-1">
                 <Circle bgColor="bg-indigo-50" size="w-8 h-8">
                   <span className="text-indigo-600 font-bold">3</span>
@@ -323,7 +323,7 @@ const MCPExplanation = () => {
             </div>
             
             {/* Step 4 */}
-            <div className="flex gap-4 items-start no-break">
+            <div className="flex gap-4 items-start page-break-inside-avoid">
               <div className="flex-shrink-0 mt-1">
                 <Circle bgColor="bg-indigo-50" size="w-8 h-8">
                   <span className="text-indigo-600 font-bold">4</span>
@@ -353,7 +353,7 @@ const MCPExplanation = () => {
             </div>
             
             {/* Step 5 */}
-            <div className="flex gap-4 items-start no-break">
+            <div className="flex gap-4 items-start page-break-inside-avoid">
               <div className="flex-shrink-0 mt-1">
                 <Circle bgColor="bg-indigo-50" size="w-8 h-8">
                   <span className="text-indigo-600 font-bold">5</span>
@@ -375,12 +375,12 @@ const MCPExplanation = () => {
       </div>
 
       {/* Real-World Applications - Page 5 */}
-      <div className="page-break">
+      <div className="page-break-before">
         <div className={sectionStyle}>
           <h2 className={sectionTitleStyle}><Globe size={20} className="text-indigo-600" /> Real-World Applications</h2>
           
           <div className="grid md:grid-cols-2 gap-5">
-            <div className={cardStyle + " bg-gradient-to-b from-white to-indigo-50/20 no-break"}>
+            <div className={cardStyle + " bg-gradient-to-b from-white to-indigo-50/20 page-break-inside-avoid"}>
               <h3 className="font-semibold text-gray-800 mb-2">Knowledge Management</h3>
               <div className="flex items-center gap-3 mb-2">
                 <Circle bgColor="bg-indigo-50" size="w-10 h-10">
@@ -391,7 +391,7 @@ const MCPExplanation = () => {
               <p className="text-xs text-gray-500 pl-12">AI can access your team's wiki, project docs, and knowledge base</p>
             </div>
             
-            <div className={cardStyle + " bg-gradient-to-b from-white to-indigo-50/20 no-break"}>
+            <div className={cardStyle + " bg-gradient-to-b from-white to-indigo-50/20 page-break-inside-avoid"}>
               <h3 className="font-semibold text-gray-800 mb-2">Data Analysis</h3>
               <div className="flex items-center gap-3 mb-2">
                 <Circle bgColor="bg-indigo-50" size="w-10 h-10">
@@ -402,7 +402,7 @@ const MCPExplanation = () => {
               <p className="text-xs text-gray-500 pl-12">AI can run SQL queries and generate meaningful insights</p>
             </div>
             
-            <div className={cardStyle + " bg-gradient-to-b from-white to-indigo-50/20 no-break"}>
+            <div className={cardStyle + " bg-gradient-to-b from-white to-indigo-50/20 page-break-inside-avoid"}>
               <h3 className="font-semibold text-gray-800 mb-2">Personal Assistance</h3>
               <div className="flex items-center gap-3 mb-2">
                 <Circle bgColor="bg-indigo-50" size="w-10 h-10">
@@ -413,7 +413,7 @@ const MCPExplanation = () => {
               <p className="text-xs text-gray-500 pl-12">AI can schedule meetings and respond to messages</p>
             </div>
             
-            <div className={cardStyle + " bg-gradient-to-b from-white to-indigo-50/20 no-break"}>
+            <div className={cardStyle + " bg-gradient-to-b from-white to-indigo-50/20 page-break-inside-avoid"}>
               <h3 className="font-semibold text-gray-800 mb-2">Code & Development</h3>
               <div className="flex items-center gap-3 mb-2">
                 <Circle bgColor="bg-indigo-50" size="w-10 h-10">
@@ -427,7 +427,7 @@ const MCPExplanation = () => {
         </div>
         
         {/* Footer */}
-        <div className="text-center text-xs text-gray-500 mt-6 no-break">
+        <div className="text-center text-xs text-gray-500 mt-6 page-break-inside-avoid">
           <p>© 2025 Patrick Freyer | <a href="https://patrickfreyer.com" className="text-indigo-600 hover:text-indigo-700">patrickfreyer.com</a> | MCP is an open standard for AI integration</p>
           <p className="mt-1">Designed for educational purposes, based on technical documentation</p>
         </div>
