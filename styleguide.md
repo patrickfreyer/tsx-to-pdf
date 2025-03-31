@@ -51,6 +51,29 @@ bg-white/50 rounded-lg p-5 mb-5 border shadow-sm
 bg-white rounded-lg p-4 border shadow-sm hover:shadow-md transition-shadow
 ```
 
+## 📄 Print Layout & Paper Formats
+
+### Page Containers
+```css
+/* Base page container */
+print:min-h-page print:flex print:flex-col print:pt-6
+
+/* Page breaks */
+page-break-before
+page-break-inside-avoid
+
+/* Content spacing */
+print:pb-4 print:mt-auto
+```
+
+### Print-Specific Layouts
+- Top-level container: `print:flex print:flex-col`
+- Section spacing: `print:pt-6` (top padding for new pages)
+- Footer positioning: `print:mt-auto`
+- Content preservation: `page-break-inside-avoid`
+- Margin reset: `print:mt-0`
+- Width control: `print:w-full`
+
 ## 📝 Typography
 
 ### Headings
@@ -138,15 +161,64 @@ active:scale-95
 grid md:grid-cols-2 lg:grid-cols-4 gap-5
 ```
 
-## 🔍 Accessibility
+### Flexible Layouts
+```css
+/* Flex container with auto-spacing */
+flex flex-col space-y-5
 
-NONE
+/* Responsive grid with gap */
+grid md:grid-cols-2 gap-5
+
+/* Auto-growing content */
+flex-grow flex flex-col
+```
+
+## 🔍 Accessibility
 
 ### Text Contrast
 - Use `text-gray-800` for primary content
 - Use `text-gray-600` for secondary content
 - Use `text-gray-500` for tertiary content
 
+### Content Structure
+- Use semantic HTML elements
+- Implement proper heading hierarchy
+- Maintain consistent spacing
+- Ensure proper color contrast ratios
+
 ## 🎪 Animation
 
-NONE
+### Transitions
+```css
+transition-shadow
+transition-all duration-200
+```
+
+## 📦 Component Best Practices
+
+### Layout Management
+```typescript
+// Container class management
+const getContainerClass = (format: 'a4' | 'letter' | 'responsive') => {
+  switch (format) {
+    case 'a4':
+      return 'max-w-[210mm] mx-auto print:w-full';
+    case 'letter':
+      return 'max-w-[8.5in] mx-auto print:w-full';
+    default:
+      return 'w-full';
+  }
+};
+```
+
+### Spacing Patterns
+- Consistent vertical rhythm: `space-y-5`
+- Grid gaps: `gap-4` or `gap-5`
+- Section margins: `mb-5` or `mb-8`
+- Print-specific spacing: `print:pt-6`, `print:pb-4`
+
+### Content Organization
+- Use `page-break-inside-avoid` for critical content blocks
+- Implement `flex-grow` for flexible content areas
+- Apply `print:mt-auto` for footer positioning
+- Maintain consistent padding with `p-4`, `p-5`, or `p-6`
