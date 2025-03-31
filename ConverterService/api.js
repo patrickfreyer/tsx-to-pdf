@@ -5,6 +5,7 @@ import fs from 'fs/promises';
 import { exec } from 'child_process';
 import { ClaudeService } from './claude-service.js';
 import { execSync } from 'child_process';
+import convertTsxToPdf from './index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -102,95 +103,46 @@ export async function listOutputFiles() {
  * @param {string} componentFile - The TSX file to export
  * @param {string} outputFile - The output PDF file name
  * @param {Object} options - Export options
- * @returns {Promise<{success: boolean, message: string, command: string}>} Result of the export operation
+ * @returns {Promise<{success: boolean, message: string, outputPath: string}>} Result of the export operation
  */
 export async function exportComponent(componentFile, outputFile, options = {}) {
-  return new Promise((resolve, reject) => {
-    // Log the received options
+  try {
     console.log(`Export options received: ${JSON.stringify(options, null, 2)}`);
     
-    // Build the command arguments - call node directly instead of using npm run
-    const args = ['ConverterService/cli.js', `input/${componentFile}`];
+    // Prepare input path and output path
+    const inputPath = `input/${componentFile}`;
+    const outputFilePath = outputFile || 'output.pdf';
     
-    // Add output file if provided
-    if (outputFile) {
-      args.push(outputFile);
+    // Prepare converter options
+    const converterOptions = {
+      format: options.format || 'auto',
+      margin: options.margin || 0,
+      debugMode: options.debug || false
+    };
+
+    // Only add width and autoSize if not using A4 format
+    if (options.format !== 'a4') {
+      converterOptions.width = parseInt(options.width, 10) || 390;
+      converterOptions.autoSize = true;
     }
+
+    // Call convertTsxToPdf directly
+    await convertTsxToPdf([inputPath], outputFilePath, converterOptions);
     
-    // Add format option
-    if (options.format) {
-      args.push(`--format=${options.format}`);
-    }
+    return {
+      success: true,
+      message: 'Export completed successfully',
+      outputPath: outputFilePath
+    };
     
-    // Add options
-    if (options.width !== undefined) {
-      const numericWidth = parseInt(options.width, 10);
-      if (!isNaN(numericWidth)) {
-        args.push(`--width=${numericWidth}`);
-        console.log(`Using width: ${numericWidth}`);
-      } else {
-        console.warn(`Invalid width value: ${options.width}, not adding to command`);
-      }
-    }
-    
-    if (options.margin !== undefined) {
-      args.push(`--margin=${options.margin}`);
-    }
-    
-    if (options.debug) {
-      args.push('--debug');
-    }
-    
-    // Build the full command for display purposes
-    const command = `node ${args.join(' ')}`;
-    console.log(`Executing command: ${command}`);
-    
-    // Execute the command
-    const process = spawn('node', args, {
-      cwd: path.join(__dirname, '..'),
-      stdio: ['ignore', 'pipe', 'pipe']
-    });
-    
-    let stdout = '';
-    let stderr = '';
-    
-    process.stdout.on('data', (data) => {
-      stdout += data.toString();
-      console.log(data.toString());
-    });
-    
-    process.stderr.on('data', (data) => {
-      stderr += data.toString();
-      console.error(data.toString());
-    });
-    
-    process.on('close', (code) => {
-      if (code === 0) {
-        resolve({
-          success: true,
-          message: 'Export completed successfully',
-          command,
-          output: stdout
-        });
-      } else {
-        resolve({
-          success: false,
-          message: `Export failed with code ${code}`,
-          command,
-          error: stderr
-        });
-      }
-    });
-    
-    process.on('error', (err) => {
-      reject({
-        success: false,
-        message: `Failed to start export process: ${err.message}`,
-        command,
-        error: err
-      });
-    });
-  });
+  } catch (error) {
+    console.error('Error during export:', error);
+    return {
+      success: false,
+      message: `Export failed: ${error.message}`,
+      error: error
+    };
+  }
 }
 
 /**
