@@ -23,10 +23,14 @@ interface ExportOptions {
   debug: boolean;
 }
 
-// Dynamically determine the API URL based on the current environment
+// Dynamically determine the API URL and base URL based on the current environment
 const API_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:3000/api' 
   : `${window.location.origin}/api`;
+
+const BASE_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000'
+  : window.location.origin;
 
 const TwoPaneLayout: React.FC = () => {
   const [components, setComponents] = useState<Component[]>([]);
@@ -261,7 +265,7 @@ const TwoPaneLayout: React.FC = () => {
                     </div>
                     <div className="flex space-x-2">
                       <a
-                        href={`${API_URL}/output/${file.file}`}
+                        href={`${BASE_URL}/output/${encodeURIComponent(file.file)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
@@ -269,8 +273,9 @@ const TwoPaneLayout: React.FC = () => {
                         View
                       </a>
                       <a
-                        href={`${API_URL}/output/${file.file}?download=true`}
+                        href={`${BASE_URL}/output/${encodeURIComponent(file.file)}`}
                         className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                        download
                       >
                         Download
                       </a>

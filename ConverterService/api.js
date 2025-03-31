@@ -312,4 +312,41 @@ export async function createTempComponent(tsxCode) {
       error: error.message
     };
   }
+}
+
+/**
+ * Serves a PDF file for viewing or downloading
+ * @param {string} filename - The name of the PDF file
+ * @param {boolean} download - Whether to serve the file as a download
+ * @returns {Promise<{success: boolean, filePath: string, error?: string}>} Result object
+ */
+export async function servePdfFile(filename, download = false) {
+  try {
+    const outputDir = path.join(__dirname, '..', 'output');
+    const filePath = path.join(outputDir, filename);
+    
+    // Check if file exists
+    try {
+      await fs.access(filePath);
+    } catch (error) {
+      return {
+        success: false,
+        error: 'File not found'
+      };
+    }
+    
+    return {
+      success: true,
+      filePath,
+      contentType: 'application/pdf',
+      contentDisposition: download ? 'attachment' : 'inline',
+      filename
+    };
+  } catch (error) {
+    console.error('Error serving PDF file:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 } 
