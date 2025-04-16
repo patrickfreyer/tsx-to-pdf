@@ -12,6 +12,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <ul className="list-disc pl-6">
         <li><a href="/ComplexFlowchart" className="text-blue-600 hover:underline">ComplexFlowchart</a></li>
         <li><a href="/AdvancedLongevityDashboard" className="text-blue-600 hover:underline">advanced-longevity-dashboard</a></li>
+        <li><a href="/AgentComparison" className="text-blue-600 hover:underline">agent-comparison</a></li>
         <li><a href="/AiDataFormatDecisionTree" className="text-blue-600 hover:underline">ai-data-format-decision-tree</a></li>
         <li><a href="/AiEconomicInsights" className="text-blue-600 hover:underline">ai-economic-insights</a></li>
         <li><a href="/ButtonShowcase" className="text-blue-600 hover:underline">button-showcase</a></li>
